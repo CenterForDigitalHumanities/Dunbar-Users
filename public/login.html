@@ -140,56 +140,33 @@
          * https://auth0.com/docs/api-auth/grant/authorization-code
          * https://auth0.com/docs/api-auth/tutorials/client-credentials
          */
-        var access_token = ""
+        var agent_uri = ""
         var auth_code = ""
         var error_code = ""
         var responseJSON = {}
         var myURL = document.location.href
 
-        if (myURL.indexOf("access_token=") > -1) {
+        if (myURL.indexOf("agent_uri=") > -1) {
             //The user registered or asked for a new token through the Client Credentials Grant flow https://auth0.com/docs/api-auth/tutorials/client-credentials
             //Presumably, they had to come to rerum to do this.  They cannot ask for new access tokens through their servers or front end.
-            access_token = getURLHash("access_token");
-            $("#test_api").show();
-            $("#a_t").val(access_token);
-            $("#login").hide();
-            $("#authorizationStatus").html("Thanks for choosing RERUM!  A new token was created for you.  Keep this token in a safe place, you will need it for our API. \n\
-                You can test that your access token will work with RERUM by clicking the 'Test API' button below.  <br> token="+ access_token);
-        }
-        else if (myURL.indexOf("code=") > -1) {
-            //The user simply checked if they were registered.  If so, they get a code.  If not, they get an error.
-            auth_code = getURLVariable("code");
-            $("#code_for_refresh_token").val(auth_code);
-            if (auth_code !== "") {
-                $("#authorizationStatus").html("AUTHORIZED: auth code=" + auth_code + ".  You are registered with the Auth0 RERUM client.  Get a new refresh token using this code.");
-            }
-            else { //Weird
-                $("#authorizationStatus").html("UNAUTHORIZED");
-            }
-            $("#login").hide();
-        }
-        else if (myURL.indexOf("error=") > -1) {
-            //The user registered, checked their status or asked for a new access token and there was a problem. 
-            error_code = getURLVariable("error");
-            if (error_code == "login_required") { //What they are asking for requires authentication against their user inside the RERUM Server Auth0 client.
-                $("#authorizationStatus").html("You must login with Auth0 for this check.");
-                $("#login").show();
-            }
-            else if (error_code == "consent_required") { //The user is logged in with auth0 but has not registered with the Rerum Server Auth0 client.
-                $("#authorizationStatus").html("You have never consented to use the API, so you do not have an access token.  Get one to test access to RERUM.");
-            }
-            else if (error_code == "interaction_required") {
-                $("#authorizationStatus").html("There are strange happenings afoot in the void of the web...");
-            }
-            $("#login").hide();
-        }
-        else { //User came to web page, we don't know much about them.  
-
+            agent_uri = getURLHash("agent_uri");
         }
 
-        $("#register").click(ev => fetch('/client/register').then(res => res.text()).then(url => location.href = url))// `https://cubap.auth0.com/authorize?response_type=code&client_id=62Jsa9MxHuqhRbO20gTHs9KpKr7Ue7sl&redirect_uri=http://store.rerum.io&state=STATE`)
+        //Go off to Auth0, come back with an Agent ID (upon successful login) or null (unsuccessful login)
+        $("#register").click(ev => fetch('/client/register')
+        .then(res => {
+            console.log(res)
+            return res.text()
+        })
+        .then(url => location.href = url))// `https://cubap.auth0.com/authorize?response_type=code&client_id=62Jsa9MxHuqhRbO20gTHs9KpKr7Ue7sl&redirect_uri=http://store.rerum.io&state=STATE`)
 
-        $("#login").click(ev => fetch('/client/register').then(res => res.text()).then(url => location.href = url))// `https://cubap.auth0.com/authorize?response_type=code&client_id=62Jsa9MxHuqhRbO20gTHs9KpKr7Ue7sl&redirect_uri=http://store.rerum.io&state=STATE`)
+        //Go off to Auth0, come back with an Agent ID (upon successful login) or null (unsuccessful login)
+        $("#login").click(ev => fetch('/client/register')
+        .then(res => {
+            console.log(res)
+            return res.text()
+        })
+        .then(url => location.href = url))// `https://cubap.auth0.com/authorize?response_type=code&client_id=62Jsa9MxHuqhRbO20gTHs9KpKr7Ue7sl&redirect_uri=http://store.rerum.io&state=STATE`)
 
         
 
