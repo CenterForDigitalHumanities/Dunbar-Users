@@ -21,7 +21,7 @@ module.exports = {
   detectOpenHandles : false,
 
   displayName: {
-    name: 'RERUM v1',
+    name: 'Dunbar Users',
     color: 'cyan',
   },
 
@@ -31,7 +31,6 @@ module.exports = {
   // An array of glob patterns indicating a set of files for which coverage information should be collected
   collectCoverageFrom: [
       //"**/*.js",
-      "**/db-controller.js",
       "**/routes/*.js"
   ],
 

@@ -5,7 +5,7 @@
  */
 
 var app = require('../app')
-var debug = require('debug')('rerum_server_nodejs:server')
+var debug = require('debug')('dunbar_users:server')
 var http = require('http')
 
 
@@ -21,7 +21,6 @@ app.set('port', port)
  */
 
 var server = http.createServer(app)
-const io = require('socket.io')(server)
 
 /**
  * Listen on provided port, on all network interfaces.
@@ -99,12 +98,3 @@ function onListening() {
     : 'port ' + addr.port
   debug('Listening on ' + bind)
 }
-
-/**
- * Socket magic for npm stop
- * */
-io.on('connection', (socketServer) => {
-  socketServer.on('npmStop', () => {
-    process.exit(0)
-  })
-})
