@@ -38,12 +38,11 @@ const checkJwt = [auth(), _tokenError, _extractUser]
 const verifyAccess = (secret) => {
     return jwt({
         secret,
-        audience: `https://dunbar-users.rerum.io/api`,
+        audience: process.env.AUDIENCE,
         issuer: `https://dunbar-users.rerum.io/`,
         algorithms: ['RS256']
     })
 }
-
 
 module.exports = {
     checkJwt,

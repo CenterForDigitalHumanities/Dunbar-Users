@@ -6,10 +6,8 @@ const auth = require('../auth')
 router.get('/connect', function(req,res,next){
   //Register means become part of the user DB on Auth0, or be identified for login
       var params = new URLSearchParams({
-          // "audience":process.env.AUDIENCE,
-          // "scope":"openid name email offline_access",
+          "audience":process.env.AUDIENCE,
           "scope":"name email openid profile offline_access",
-          //"response_type":"code",
           "response_type":"token",
           "client_id":process.env.CLIENTID,
           "redirect_uri":process.env.DUNBAR_REDIRECT,
