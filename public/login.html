@@ -48,10 +48,6 @@
             margin-bottom: 20px;
         }
     
-        #login {
-            display: none;
-        }
-    
         .panel-body {
             color: initial;
         }
@@ -83,31 +79,17 @@
 
 <body class="container">
     <h1 onclick="window.location='https://dunbar-users.rerum.io'" target="_blank" class="navbar-brand"><i class="fa fa-cubes"></i>
-        rerum</h1>
+        dunbar</h1>
     <div class='' id="intro">
         <p>
-            We are so glad you are interested in using Saint Louis University's public object store, RERUM! Want to know
-            what RERUM is all about?
+            We are so glad you are interested in researching the works of Paul Dunbar.
         </p>
-        <ol type="1" id='rerumPrinciples'>
-            <li><strong>As RESTful as is reasonable—</strong>accept and respond to a broad range of requests without
-                losing the map</li>
-            <li><strong>As compliant as is practical—</strong>take advantage of standards and harmonize conflicts</li>
-            <li><strong>Save an object, retrieve an object—</strong>store metadata in private (__rerum) property, rather
-                than wrap all data transactions</li>
-            <li><strong>Trust the application, not the user—</strong>avoid multiple login and authentication
-                requirements and honor open data attributions</li>
-            <li><strong>Open and Free—</strong>expose all contributions immediately without charge to write or read</li>
-            <li><strong>Attributed and Versioned—</strong>always include asserted ownership and transaction metadata so
-                consumers can evaluate trustworthiness and relevance</li>
-        </ol>
     </div>
     <div class='panel panel-info' name="block">
         <div class="panel-heading"> <span class="panel-title">Dunbar App Registration</span> </div>
         <div class="panel-body">
             <p class="handHoldy">
                 After registering, you will be returned to this page with an Auth0 Token with your agent encoded or a response with the agent in it or something, whatever. <br>
-                Agent is <span id="agentURI"> </span>
             </p>
         </div>
         <div class="panel-footer">
@@ -122,7 +104,7 @@
             </p>
             <div>
                 <span class="status_header"> Dunbar App Agent </span>
-                <kbd class="rerumStatus" id="authorizationStatus">UNKNOWN</kbd>
+                <kbd class="rerumStatus" id="agentURI">UNKNOWN</kbd>
             </div>
         </div>
         <div class="panel-footer">
@@ -141,28 +123,40 @@
          * https://auth0.com/docs/api-auth/tutorials/client-credentials
          */
         var agent_uri = ""
+        var agent_access_token = ""
         var auth_code = ""
         var error_code = ""
         var responseJSON = {}
         var myURL = document.location.href
 
-        if (myURL.indexOf("agent_uri=") > -1) {
-            //The user registered or asked for a new token through the Client Credentials Grant flow https://auth0.com/docs/api-auth/tutorials/client-credentials
-            //Presumably, they had to come to rerum to do this.  They cannot ask for new access tokens through their servers or front end.
-            agent_uri = getURLHash("agent_uri");
+        if (myURL.indexOf("access_token=") > -1) {
+            //We want Auth0 to give us the user info for this access token
+            fetch('/client/dunbar-user?access_token='+getURLHash("access_token"))
+            .then(res => res.json())
+            .then(u => {
+                console.log("I know the user now.")
+                console.log(u)
+                agentURI = u["http://store.rerum.io/agent"]
+                alert(`Hello ${agentURI}!.  As you go around to the Dunbar apps, the Bearer ${getURLHash("access_token")} can be used to allow you access.`)
+            })
+            .catch(err =>{
+                console.error(err)
+            })
         }
 
         //Go off to Auth0, come back with an Agent ID (upon successful login) or null (unsuccessful login)
-        $("#register").click(ev => fetch('/client/register')
+        $("#register").click(ev => fetch('/client/connect')
         .then(res => {
+            //#access_token=VF9uZ9zjs2UPz7xKbaPJO4gpDtjw_Zj0&scope=openid%20profile%20email&expires_in=7200&token_type=Bearer&state=dunbar123
             console.log(res)
             return res.text()
         })
         .then(url => location.href = url))// `https://cubap.auth0.com/authorize?response_type=code&client_id=62Jsa9MxHuqhRbO20gTHs9KpKr7Ue7sl&redirect_uri=http://store.rerum.io&state=STATE`)
 
         //Go off to Auth0, come back with an Agent ID (upon successful login) or null (unsuccessful login)
-        $("#login").click(ev => fetch('/client/register')
+        $("#login").click(ev => fetch('/client/connect')
         .then(res => {
+            //#access_token=VF9uZ9zjs2UPz7xKbaPJO4gpDtjw_Zj0&scope=openid%20profile%20email&expires_in=7200&token_type=Bearer&state=dunbar123
             console.log(res)
             return res.text()
         })
