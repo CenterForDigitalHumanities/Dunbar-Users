@@ -12,7 +12,7 @@ router.get('/connect', function(req,res,next){
           //"response_type":"code",
           "response_type":"token",
           "client_id":process.env.CLIENTID,
-          "redirect_uri":process.env.DUNBAR_PREFIX,
+          "redirect_uri":process.env.DUNBAR_REDIRECT,
           "state":"dunbar123"           
       }).toString()
       res.status(200).send("https://cubap.auth0.com/authorize?" + params)
