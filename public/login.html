@@ -82,7 +82,7 @@
 </head>
 
 <body class="container">
-    <h1 onclick="window.location='http://rerum.io'" target="_blank" class="navbar-brand"><i class="fa fa-cubes"></i>
+    <h1 onclick="window.location='https://dunbar-users.rerum.io'" target="_blank" class="navbar-brand"><i class="fa fa-cubes"></i>
         rerum</h1>
     <div class='' id="intro">
         <p>
@@ -103,126 +103,33 @@
         </ol>
     </div>
     <div class='panel panel-info' name="block">
-        <div class="panel-heading"> <span class="panel-title">Application Registration</span> </div>
+        <div class="panel-heading"> <span class="panel-title">Dunbar App Registration</span> </div>
         <div class="panel-body">
             <p class="handHoldy">
-                Interacting with RERUM requires server-to-server communication, so we suggest the registrant be the
-                application developer.
-                You may want to
-                <a target="_blank" href="https://centerfordigitalhumanities.github.io/rerum/#/future"
-                    class="linkOut">learn more about the concepts around RERUM</a>
-                before reading the API.
-            </p>
-            <p class="handHoldy">
-                If you are here for the first time and think you want to use RERUM, please
-                <a target="_blank" href="https://github.com/CenterForDigitalHumanities/rerum_server/blob/master/API.md"
-                    class="linkOut">read the API</a> first.
-            </p>
-
-            <p class="handHoldy">
-                If you like what you read in <a target="_blank"
-                    href="https://github.com/CenterForDigitalHumanities/rerum_server/blob/master/API.md"
-                    class="linkOut">our API documentation</a>
-                and want to begin using RERUM as a back stack service please register by clicking below.
-                Be prepared to be routed to Auth0 (don't know why?
-                <a target="_blank" href="https://github.com/CenterForDigitalHumanities/rerum_server/blob/master/API.md"
-                    class="linkOut">Read the API</a>).
-            </p>
-            <p class="handHoldy">
-                After registering, you will be returned to this page with an Auth0 Authorization code. Use that code at
-                the bottom of this page to get a refresh token
-                and an access token so you can use the API. You may notice the page has already populated known
-                information for you.
+                After registering, you will be returned to this page with an Auth0 Token with your agent encoded or a response with the agent in it or something, whatever. <br>
+                Agent is <span id="agentURI"> </span>
             </p>
         </div>
         <div class="panel-footer">
-            <input class='btn btn-primary btn-large' type="button" id="register" value="Register With RERUM At Auth0" />
+            <input class='btn btn-primary btn-large' type="button" id="register" value="Register with the Dunbar App" />
         </div>
     </div>
-
     <div class='panel panel-info' name="block">
-        <div class="panel-heading"> <span class="panel-title">Auth0 Authorization Status</span> </div>
+        <div class="panel-heading"> <span class="panel-title">Existing User Login</span> </div>
         <div class="panel-body">
             <p class="handHoldy">
-                If you believe you are already registered and want to check on your status, follow the prompts below.
-                You will be routed to Auth0 so we can verify who you are.
+                If you have registered with the Dunbar app already, login below.
             </p>
             <div>
-                <span class="status_header"> Auth0 Status </span>
+                <span class="status_header"> Dunbar App Agent </span>
                 <kbd class="rerumStatus" id="authorizationStatus">UNKNOWN</kbd>
             </div>
         </div>
         <div class="panel-footer">
-            <input class='btn btn-primary btn-large' type="button" id="check_status"
-                value="Check my Authorization Status With Auth0" />
-            <!--<input class='btn btn-primary btn-large' type="button" id="login" value="Login To Get Auth Status" />-->
+            <input class='btn btn-primary btn-large' type="button" id="login"
+                value="Login To Dunbar App" />
         </div>
     </div>
-
-    <div class='panel panel-info' name="block">
-        <div class="panel-heading"> <span class="panel-title">Test RERUM API Access</span> </div>
-        <div class="panel-body">
-            <p class="handHoldy">
-                Provide your access token below to check if it is still valid. If so, your access to RERUM will be
-                authorized. Otherwise, you will see an "unauthorized" message.
-            </p>
-            <p class="handHoldy">
-                If the token you have is not working, it may be because access tokens expire every 2 hours. You can use
-                your refresh token to get a new access token.
-            </p>
-            <textarea class="form-control" id="a_t" placeholder="Your access token goes here."></textarea>
-            <div>
-                <span class="status_header"> RERUM status </span>
-                <kbd class="rerumStatus" id="rerumStatus" class="">UNKNOWN</kbd>
-            </div>
-        </div>
-        <div class="panel-footer">
-            <input class='btn btn-primary btn-large' type="button" onclick="testAPI()" id="test_api"
-                value="Check Access To RERUM API" />
-        </div>
-    </div>
-
-    <div class='panel panel-info' name="block">
-        <div class="panel-heading"> <span class="panel-title">Get A New Access Token</span> </div>
-        <div class="panel-body">
-            <p class="handHoldy">
-                Your access token to use RERUM expires every 2 hours. Has it been that long or longer? Provide your
-                refresh token below to get a new access token.
-                If you lost your refresh token, you can get a new one in "Get A New Refresh Token" below.
-            </p>
-            <textarea class="form-control" placeholder="Your refresh token goes here." id="r_t_4_a_t"></textarea>
-            <div>
-                <span class="status_header"> Status </span>
-                <kbd class="rerumStatus" id="natStatus">UNKNOWN</kbd>
-            </div>
-        </div>
-        <div class="panel-footer">
-            <input class='btn btn-primary btn-large' type="button" id="request_token" value="Get A New Access Token" />
-        </div>
-    </div>
-
-    <div class='panel panel-info' name="block">
-        <div class="panel-heading"> <span class="panel-title">Get A New Refresh Token</span> </div>
-        <div class="panel-body">
-            <p class="handHoldy">
-                You can supply a valid Auth0 Authorization Code to get a new refresh token. Use "Check my Authorization
-                Status with Auth0" to get a valid code.
-            </p>
-            Enter your code: <textarea class="form-control" placeholder="Your Auth0 Authorization Code goes here"
-                id="code_for_refresh_token"></textarea>
-            <br>
-            <textarea readonly class="form-control" id="new_refresh_token"
-                placeholder="Your refresh token will appear here."></textarea>
-            <div>
-                <span class="status_header"> Status </span>
-                <kbd class="rerumStatus" id="nrtStatus">UNKNOWN</kbd>
-            </div>
-        </div>
-        <div class="panel-footer">
-            <input class='btn btn-primary btn-large' type="button" id="refresh_token" value="Get A New Refresh Token" />
-        </div>
-    </div>
-
     <script type="text/javascript">
         /*
          * The process we are mimicking here is https://auth0.com/docs/api-auth/grant/authorization-code and 
@@ -245,7 +152,7 @@
             access_token = getURLHash("access_token");
             $("#test_api").show();
             $("#a_t").val(access_token);
-            $("#check_status").hide();
+            $("#login").hide();
             $("#authorizationStatus").html("Thanks for choosing RERUM!  A new token was created for you.  Keep this token in a safe place, you will need it for our API. \n\
                 You can test that your access token will work with RERUM by clicking the 'Test API' button below.  <br> token="+ access_token);
         }
@@ -259,7 +166,7 @@
             else { //Weird
                 $("#authorizationStatus").html("UNAUTHORIZED");
             }
-            $("#check_status").hide();
+            $("#login").hide();
         }
         else if (myURL.indexOf("error=") > -1) {
             //The user registered, checked their status or asked for a new access token and there was a problem. 
@@ -274,7 +181,7 @@
             else if (error_code == "interaction_required") {
                 $("#authorizationStatus").html("There are strange happenings afoot in the void of the web...");
             }
-            $("#check_status").hide();
+            $("#login").hide();
         }
         else { //User came to web page, we don't know much about them.  
 
@@ -282,7 +189,7 @@
 
         $("#register").click(ev => fetch('/client/register').then(res => res.text()).then(url => location.href = url))// `https://cubap.auth0.com/authorize?response_type=code&client_id=62Jsa9MxHuqhRbO20gTHs9KpKr7Ue7sl&redirect_uri=http://store.rerum.io&state=STATE`)
 
-        $("#check_status").click(ev => fetch('/client/register').then(res => res.text()).then(url => location.href = url))// `https://cubap.auth0.com/authorize?response_type=code&client_id=62Jsa9MxHuqhRbO20gTHs9KpKr7Ue7sl&redirect_uri=http://store.rerum.io&state=STATE`)
+        $("#login").click(ev => fetch('/client/register').then(res => res.text()).then(url => location.href = url))// `https://cubap.auth0.com/authorize?response_type=code&client_id=62Jsa9MxHuqhRbO20gTHs9KpKr7Ue7sl&redirect_uri=http://store.rerum.io&state=STATE`)
 
         
 
