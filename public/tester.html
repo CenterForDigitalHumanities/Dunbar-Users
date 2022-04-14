@@ -20,15 +20,31 @@
     <div id="loginStatus"> YOU ARE NOT LOGGED IN </div>
     <script type="text/javascript">
         checkIfLoggedIn()
-
         function checkIfLoggedIn(){
             /**
              * So then what is this even?  This user logged in elsewhere and obtained a good access token that will live until it expires or they log out. What is our mechanism for storing and checking the token?  We using localStorage or sessionStorage or cookies?
              *
              * We will hit dunbar-users/userinfo which will either return a user profile or an error (401/403) to signify we are not logged in.
              */ 
-            loginStatus.innerHTML = "STILL WORKING ON IT"
-            return true
+            if(sessionStorage.getItem('Agent-URI') || localStorage.getItem("Agent-URI")){
+                //Check if it is dead
+                fetch('/client/dunbar-user?access_token='+getURLHash("access_token"))
+                .then(res => res.json())
+                .then(u => {
+                    loginStatus.innerHTML = "You are logged in"
+                    return true
+                })
+                .catch(err =>{
+                    loginStatus.innerHTML = "You are an unknown entity"
+                    return false
+                }) 
+            }
+            else{
+                //Well if it's not then then you screwed up, you're not logged in on this browser.
+                loginStatus.innerHTML = "You are an unknown entity"
+                return false
+            }
+            
         }
     </script>
 </body>
