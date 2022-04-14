@@ -20,24 +20,33 @@
     <div id="loginStatus"> YOU ARE NOT LOGGED IN </div>
     <script src="https://cdn.auth0.com/js/auth0/9.11/auth0.min.js"></script>
     <script type="text/javascript">
+        const AUDIENCE = "http://dunbar-users.rerum.io/api"
+        const ISSUER_BASE_URL = "cubap.auth0.com"
+        const CLIENTID = "z1DuwzGPYKmF7POW9LiAipO5MvKSDERM"
+        const DUNBAR_REDIRECT = "http://localhost:3000/login.html"
+
         logout()
+
         function logout(){
             //Make it so that the token or session is seen as dead on Auth0
             var webAuth = new auth0.WebAuth({
-                domain:       process.env.ISSUER_BASE_URL,
-                clientID:     process.env.CLIENTID
+                domain:       ISSUER_BASE_URL,
+                clientID:     CLIENTID
             })
             webAuth.logout({
-                returnTo: process.env.DUNBAR_REDIRECT,
-                client_id: process.env.CLIENTID
+                returnTo: DUNBAR_REDIRECT,
+                client_id: CLIENTID
             })
-            //Get rid of the session info from sessionStorage and localStorage and cookies
-            sessionStorage.removeItem('Agent-URI')
-            sessionStorage.removeItem('Dunbar-Token')
-            localStorage.removeItem('Agent-URI')
-            localStorage.removeItem('Dunbar-Token')
-            document.cookie = "Agent-URI=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-            document.cookie = "Dunbar-Token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+            .then(res => {
+                //Get rid of the session info from sessionStorage and localStorage and cookies
+                sessionStorage.removeItem('Agent-URI')
+                sessionStorage.removeItem('Dunbar-Token')
+                localStorage.removeItem('Agent-URI')
+                localStorage.removeItem('Dunbar-Token')
+                document.cookie = "Agent-URI=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+                document.cookie = "Dunbar-Token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";    
+            })
+
         }
     </script>
 </body>

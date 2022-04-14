@@ -112,12 +112,7 @@
                 value="Login To Dunbar App" />
         </div>
     </div>
-    <script src="https://cdn.auth0.com/js/auth0/9.11/auth0.min.js"></script>
     <script type="text/javascript">
-        var webAuth = new auth0.WebAuth({
-            domain:       process.env.ISSUER_BASE_URL,
-            clientID:     process.env.CLIENTID
-        })
         var agent_uri = ""
         var agent_access_token = ""
         var auth_code = ""
@@ -139,64 +134,58 @@
             })
             .catch(err =>{
                 console.error(err)
-            })
+            }) 
         }
-        //Go off to Auth0, come back with an Agent ID (upon successful login) or null (unsuccessful login)
-        $("#register").click(ev => {
-            // Trigger login
-            webAuth.authorize({
-                "audience":process.env.AUDIENCE,
-                "scope":"name email openid profile offline_access",
-                "response_type":"token",
-                "client_id":process.env.CLIENTID,
-                "redirect_uri":process.env.DUNBAR_REDIRECT,
-                "state":"dunbar123"      
-            })
-            .then(res => {
-            //#access_token=VF9uZ9zjs2UPz7xKbaPJO4gpDtjw_Zj0&scope=openid%20profile%20email&expires_in=7200&token_type=Bearer&state=dunbar123
-                console.log("resolved login")
-                console.log(res.text())
-                //return res.text()
-            })
-        })
 
-        //Go off to Auth0, come back with an Agent ID (upon successful login) or null (unsuccessful login)
-        $("#login").click(ev => {
-            // Trigger login
-            webAuth.authorize({
-                "audience":process.env.AUDIENCE,
-                "scope":"name email openid profile offline_access",
-                "response_type":"token",
-                "client_id":process.env.CLIENTID,
-                "redirect_uri":process.env.DUNBAR_REDIRECT,
-                "state":"dunbar123"      
-            })
-            .then(res => {
-            //#access_token=VF9uZ9zjs2UPz7xKbaPJO4gpDtjw_Zj0&scope=openid%20profile%20email&expires_in=7200&token_type=Bearer&state=dunbar123
-                console.log("resolved login")
-                console.log(res.text())
-                //return res.text()
-            })
-        })
-
-        /*
         //Go off to Auth0, come back with an Agent ID (upon successful login) or null (unsuccessful login)
         $("#register").click(ev => fetch('/client/connect')
         .then(res => {
-            //#access_token=VF9uZ9zjs2UPz7xKbaPJO4gpDtjw_Zj0&scope=openid%20profile%20email&expires_in=7200&token_type=Bearer&state=dunbar123
             console.log(res)
             return res.text()
         })
-        .then(url => location.href = url))// `https://cubap.auth0.com/authorize?response_type=code&client_id=62Jsa9MxHuqhRbO20gTHs9KpKr7Ue7sl&redirect_uri=http://store.rerum.io&state=STATE`)
+        .then(url => location.href = url))
 
         //Go off to Auth0, come back with an Agent ID (upon successful login) or null (unsuccessful login)
         $("#login").click(ev => fetch('/client/connect')
         .then(res => {
-            //#access_token=VF9uZ9zjs2UPz7xKbaPJO4gpDtjw_Zj0&scope=openid%20profile%20email&expires_in=7200&token_type=Bearer&state=dunbar123
             console.log(res)
             return res.text()
         })
-        .then(url => location.href = url))// `https://cubap.auth0.com/authorize?response_type=code&client_id=62Jsa9MxHuqhRbO20gTHs9KpKr7Ue7sl&redirect_uri=http://store.rerum.io&state=STATE`)
+        .then(url => location.href = url))
+
+        /*
+        //Do the auth0 stuff but with a pop up instead of redirects (imagin PayPal)
+        $("#login").click(ev => {
+            const AUDIENCE = "http://dunbar-users.rerum.io/api"
+            const ISSUER_BASE_URL = "cubap.auth0.com"
+            const CLIENTID = "z1DuwzGPYKmF7POW9LiAipO5MvKSDERM"
+            const DUNBAR_REDIRECT = "http://localhost:3000/login.html"
+
+            var webAuth = new auth0.WebAuth({
+                domain:       ISSUER_BASE_URL,
+                clientID:     CLIENTID
+            })
+            webAuth.popup.authorize({
+                "audience":AUDIENCE,
+                "scope":"name email openid profile offline_access",
+                "redirectUri": DUNBAR_REDIRECT,
+                "responseType" : "token",
+                "clientId" : CLIENTID,
+                "state" : "dunbar123"
+              //Any additional options can go here
+            }, function(err, authResult) {
+                console.log("login result")
+                console.log(authResult)
+                webAuth.client.userInfo(getURLHash("access_token"), function(err, u) {
+                    console.log("I know the user now.")
+                    console.log(u)
+                    let agentURI = u["http://store.rerum.io/agent"]
+                    sessionStorage.setItem('Agent-URI', agentURI)
+                    sessionStorage.setItem('Dunbar-Token', getURLHash("access_token"))
+                    alert(`Hello ${agentURI}!.  As you go around to the Dunbar apps, the Bearer ${getURLHash("access_token")} can be used to allow you access.`)
+                })
+            })
+        })
         */
 
         function getURLVariable(variable) {

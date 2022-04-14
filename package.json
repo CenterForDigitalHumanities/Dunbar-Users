@@ -11,6 +11,7 @@
     "runtest": "node ./bin/testApp.js"
   },
   "dependencies": {
+    "auth0": "^2.40.0",
     "aws-secrets-dotenv": "^1.0.0",
     "cookie-parser": "~1.4.4",
     "cors": "^2.8.5",
