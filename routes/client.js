@@ -32,8 +32,12 @@ router.get('/disconnect', function(req,res,next){
 router.get('/dunbar-user', async function(req,res,next){
   let user = null
   if(req.query.access_token){
-    let user = await got.get("https://cubap.auth0.com/userinfo?access_token="+req.query.access_token).json()
-    res.status(200).json(user)
+    let user = await got.get("https://cubap.auth0.com/userinfo?access_token="+req.query.access_token)
+    .then(res => res.json())
+    .catch(err =>{
+        console.error(err)
+        res.status(401).send("This token is dead Jim")
+    }) 
     return user
   }
   else{
