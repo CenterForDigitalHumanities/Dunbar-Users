@@ -21,7 +21,14 @@ router.get('/connect', function(req,res,next){
   })
 
 router.get('/disconnect', function(req,res,next){
-  //Logout this user
+//This does not invalidate an access token.  They cannot be invalidated. 
+//See https://community.auth0.com/t/invalidating-an-access-token-when-user-logs-out/48365
+/*
+Logging out destroys the session, but not access tokens.
+Access tokens cannot be revoked. They are self-contained, enabling verification by the backend without contacting Auth0 (except to get the signature verification keys which don’t change very often and should be cached). Thus there is no way to revoke them.
+Make your access tokens shortlived because of this.
+*/
+//So can I check on the session with an auth0 endpoint somehow.
       var params = new URLSearchParams({
           "audience":process.env.AUDIENCE,
           "client_id":process.env.CLIENTID,
@@ -34,6 +41,7 @@ router.get('/dunbar-user', async function(req,res,next){
   let user = {}
   if(req.query.access_token){
     try {
+      //We hoped /userinfo would fail if they logout.  It does not.
       user = await got.get("https://cubap.auth0.com/userinfo?access_token="+req.query.access_token).json()
       console.log("Give back user from /dunbar-user")
       console.log(user)
