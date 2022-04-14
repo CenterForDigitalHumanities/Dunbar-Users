@@ -13,9 +13,11 @@
 </head>
 
 <body class="container">
+    <h1 onclick="window.location='login.html'" target="_blank" class="navbar-brand"><i class="fa fa-cubes"></i>
+        dunbar</h1>
     <p>
         This page wants you to be logged into DLA.  It will perform the checks and message you.
-        <a target="_blank" href="/login.html">Login here</a>, then refresh the page.
+        <a target="_blank" href="login.html">Login here</a>, then refresh the page.
     </p>
     <div id="loginStatus"> YOU ARE NOT LOGGED IN </div>
     <script type="text/javascript">
@@ -28,7 +30,7 @@
              */ 
             if(sessionStorage.getItem('Agent-URI') || localStorage.getItem("Agent-URI")){
                 //Check if it is dead
-                fetch('/client/dunbar-user?access_token='+getURLHash("access_token"))
+                fetch('/client/dunbar-user?access_token='+sessionStorage.getItem('Dunbar-Token'))
                 .then(res => res.json())
                 .then(u => {
                     loginStatus.innerHTML = "You are logged in"

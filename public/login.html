@@ -104,7 +104,7 @@
             </p>
             <div>
                 <span class="status_header"> Dunbar App Agent </span>
-                <kbd class="rerumStatus" id="agentURI">UNKNOWN</kbd>
+                <kbd class="rerumStatus" id="agentLink">NOT LOGGED IN</kbd>
             </div>
         </div>
         <div class="panel-footer">
@@ -128,6 +128,7 @@
                 console.log("I know the user now.")
                 console.log(u)
                 agentURI = u["http://store.rerum.io/agent"]
+                agentLink.innerHTML = agentURI
                 sessionStorage.setItem('Agent-URI', agentURI)
                 sessionStorage.setItem('Dunbar-Token', getURLHash("access_token"))
                 alert(`Hello ${agentURI}!.  As you go around to the Dunbar apps, the Bearer ${getURLHash("access_token")} can be used to allow you access.`)
@@ -153,41 +154,6 @@
             return res.text()
         })
         .then(url => location.href = url))
-
-        /*
-        //Do the auth0 stuff but with a pop up instead of redirects (imagin PayPal)
-        $("#login").click(ev => {
-            const AUDIENCE = "http://dunbar-users.rerum.io/api"
-            const ISSUER_BASE_URL = "cubap.auth0.com"
-            const CLIENTID = "z1DuwzGPYKmF7POW9LiAipO5MvKSDERM"
-            const DUNBAR_REDIRECT = "http://localhost:3000/login.html"
-
-            var webAuth = new auth0.WebAuth({
-                domain:       ISSUER_BASE_URL,
-                clientID:     CLIENTID
-            })
-            webAuth.popup.authorize({
-                "audience":AUDIENCE,
-                "scope":"name email openid profile offline_access",
-                "redirectUri": DUNBAR_REDIRECT,
-                "responseType" : "token",
-                "clientId" : CLIENTID,
-                "state" : "dunbar123"
-              //Any additional options can go here
-            }, function(err, authResult) {
-                console.log("login result")
-                console.log(authResult)
-                webAuth.client.userInfo(getURLHash("access_token"), function(err, u) {
-                    console.log("I know the user now.")
-                    console.log(u)
-                    let agentURI = u["http://store.rerum.io/agent"]
-                    sessionStorage.setItem('Agent-URI', agentURI)
-                    sessionStorage.setItem('Dunbar-Token', getURLHash("access_token"))
-                    alert(`Hello ${agentURI}!.  As you go around to the Dunbar apps, the Bearer ${getURLHash("access_token")} can be used to allow you access.`)
-                })
-            })
-        })
-        */
 
         function getURLVariable(variable) {
             var query = window.location.search.substring(1);

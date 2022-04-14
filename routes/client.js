@@ -17,28 +17,32 @@ router.get('/connect', function(req,res,next){
           "redirect_uri":process.env.DUNBAR_REDIRECT,
           "state":"dunbar123"           
       }).toString()
-      res.status(301).send("https://cubap.auth0.com/authorize?" + params)
+      res.status(200).send("https://cubap.auth0.com/authorize?" + params)
   })
 
 router.get('/disconnect', function(req,res,next){
   //Logout this user
       var params = new URLSearchParams({
+          "audience":process.env.AUDIENCE,
           "client_id":process.env.CLIENTID,
-          "returnTo":process.env.DUNBAR_REDIRECT      
+          "returnTo":process.env.DUNBAR_REDIRECT+"?loggedOut=true",     
       }).toString()
-      res.status(301).send("https://cubap.auth0.com/v2/logout?" + params)
+      res.status(200).send("https://cubap.auth0.com/v2/logout?" + params)
   })
 
 router.get('/dunbar-user', async function(req,res,next){
-  let user = null
+  let user = {}
   if(req.query.access_token){
-    let user = await got.get("https://cubap.auth0.com/userinfo?access_token="+req.query.access_token)
-    .then(res => res.json())
-    .catch(err =>{
-        console.error(err)
-        res.status(401).send("This token is dead Jim")
-    }) 
-    return user
+    try {
+      user = await got.get("https://cubap.auth0.com/userinfo?access_token="+req.query.access_token).json()
+      console.log("Give back user from /dunbar-user")
+      console.log(user)
+    } 
+    catch (e) {
+      console.error(e)
+      res.status(401).send("This token is dead Jim")
+    }
+    res.status(200).json(user)
   }
   else{
     res.status(400).send("Your request does not contain an access token.")

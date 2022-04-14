@@ -20,19 +20,18 @@
     <div id="loginStatus"> YOU ARE NOT LOGGED IN </div>
     <script type="text/javascript">
         //Logout just by coming here, for now.  You will be redirect to login.
+        //Get rid of the session info from sessionStorage and localStorage and cookies
+        sessionStorage.removeItem('Agent-URI')
+        sessionStorage.removeItem('Dunbar-Token')
+        localStorage.removeItem('Agent-URI')
+        localStorage.removeItem('Dunbar-Token')
+        document.cookie = "Agent-URI=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;"
+        document.cookie = "Dunbar-Token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;"
         fetch('/client/disconnect')
-        .then(res => {
-            console.log(res)
-            //Get rid of the session info from sessionStorage and localStorage and cookies
-            sessionStorage.removeItem('Agent-URI')
-            sessionStorage.removeItem('Dunbar-Token')
-            localStorage.removeItem('Agent-URI')
-            localStorage.removeItem('Dunbar-Token')
-            document.cookie = "Agent-URI=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;"
-            document.cookie = "Dunbar-Token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;"
-            return res.text()
+        .then(res => res.text())
+        .then(url => {
+            location.href = url
         })
-        .then(url => location.href = url)
     </script>
 </body>
 
