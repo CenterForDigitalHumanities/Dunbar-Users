@@ -5,6 +5,10 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <title>Logged In/Out Test</title>
     <style>
+        #loginStatus{
+            font-size:  125%;
+            font-weight:  bolder;
+        }
     </style>
 </head>
 
@@ -13,11 +17,17 @@
         This page wants you to be logged into DLA.  It will perform the checks and message you.
         <a target="_blank" href="/login.html">Login here</a>, then refresh the page.
     </p>
+    <div id="loginStatus"> YOU ARE NOT LOGGED IN </div>
     <script type="text/javascript">
         checkIfLoggedIn()
 
         function checkIfLoggedIn(){
-
+            /**
+             * So then what is this even?  This user logged in elsewhere and obtained a good access token that will live until it expires or they log out. What is our mechanism for storing and checking the token?  We using localStorage or sessionStorage or cookies?
+             *
+             * We will hit dunbar-users/userinfo which will either return a user profile or an error (401/403) to signify we are not logged in.
+             */ 
+            loginStatus.innerHTML = "STILL WORKING ON IT"
             return true
         }
     </script>

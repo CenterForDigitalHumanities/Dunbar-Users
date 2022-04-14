@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en-us">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>Log Out</title>
+    <style>
+        #loginStatus{
+            font-size:  125%;
+            font-weight:  bolder;
+        }
+    </style>
+</head>
+
+<body class="container">
+    <p>
+        This page will log you out of DLA.
+        <a target="_blank" href="/login.html">Login here</a>.
+    </p>
+    <div id="loginStatus"> YOU ARE NOT LOGGED IN </div>
+    <script src="https://cdn.auth0.com/js/auth0/9.11/auth0.min.js"></script>
+    <script type="text/javascript">
+        logout()
+        function logout(){
+            //Make it so that the token or session is seen as dead on Auth0
+            var webAuth = new auth0.WebAuth({
+                domain:       process.env.ISSUER_BASE_URL,
+                clientID:     process.env.CLIENTID
+            })
+            webAuth.logout({
+                returnTo: process.env.DUNBAR_REDIRECT,
+                client_id: process.env.CLIENTID
+            })
+            //Get rid of the session info from sessionStorage and localStorage and cookies
+            sessionStorage.removeItem('Agent-URI')
+            sessionStorage.removeItem('Dunbar-Token')
+            localStorage.removeItem('Agent-URI')
+            localStorage.removeItem('Dunbar-Token')
+            document.cookie = "Agent-URI=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+            document.cookie = "Dunbar-Token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        }
+    </script>
+</body>
+
+</html>
