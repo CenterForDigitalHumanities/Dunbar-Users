@@ -28,25 +28,23 @@
              *
              * We will hit dunbar-users/userinfo which will either return a user profile or an error (401/403) to signify we are not logged in.
              */ 
-            if(sessionStorage.getItem('Agent-URI') || localStorage.getItem("Agent-URI")){
-                //Check if it is dead
+            if(sessionStorage.getItem('Dunbar-Token')){
+                //Someone logged in previously
                 fetch('/client/dunbar-user?access_token='+sessionStorage.getItem('Dunbar-Token'))
                 .then(res => res.json())
                 .then(u => {
-                    loginStatus.innerHTML = "You are logged in"
+                    loginStatus.innerHTML = `You are logged in as ${u.email}`
                     return true
                 })
                 .catch(err =>{
-                    loginStatus.innerHTML = "You are an unknown entity"
+                    loginStatus.innerHTML = `Your session has expired, please log in again`
                     return false
                 }) 
             }
             else{
-                //Well if it's not then then you screwed up, you're not logged in on this browser.
-                loginStatus.innerHTML = "You are an unknown entity"
-                return false
+                //You are not logged in and you never tried so get outta here.
+                document.location.href = "login.html"
             }
-            
         }
     </script>
 </body>

@@ -17,7 +17,6 @@
         This page will log you out of DLA.
         <a target="_blank" href="/login.html">Login here</a>.
     </p>
-    <div id="loginStatus"> YOU ARE NOT LOGGED IN </div>
     <script type="text/javascript">
         //Logout just by coming here, for now.  You will be redirect to login.
         //Get rid of the session info from sessionStorage and localStorage and cookies
@@ -30,8 +29,13 @@
         fetch('/client/disconnect')
         .then(res => res.text())
         .then(url => {
-            location.href = url
+            document.location.href = "login.html"
         })
+        .catch(err =>{
+            //Gosh dang, whatever, they are removed from sessionStorage and will have to login again.
+            document.location.href = "login.html"
+        }) 
+        
     </script>
 </body>
 

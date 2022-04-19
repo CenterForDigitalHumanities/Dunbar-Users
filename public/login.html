@@ -113,33 +113,47 @@
         </div>
     </div>
     <script type="text/javascript">
-        var agent_uri = ""
-        var agent_access_token = ""
-        var auth_code = ""
-        var error_code = ""
-        var responseJSON = {}
-        var myURL = document.location.href
-        
+        let agent_uri = ""
+        let agent_access_token = ""
+        let auth_code = ""
+        let error_code = ""
+        let responseJSON = {}
+        let myURL = document.location.href
+        let token = sessionStorage.getItem("Dunbar-Token")
+        let agent = sessionStorage.getItem("Agent-URI")
+
+        //Auth0 Login Widget was successful and it redirect here with the access token in the URL.
+        //Put the token in session storage and refresh the page.  We don't want it in the address bar.
         if (myURL.indexOf("access_token=") > -1) {
-            //We want Auth0 to give us the user info for this access token
-            fetch('/client/dunbar-user?access_token='+getURLHash("access_token"))
+            //Auth0 adds this to redirects.  Remove it from the address bar.
+            sessionStorage.setItem('Dunbar-Token', getURLHash("access_token"))
+            document.location.href="login.html"
+        }
+        else if(token){
+            //A token was in sessionStorage, so there was a login during this window session.
+            //An access token is stored. Let's use it to get the user info.  If it fails, the user needs to login again.
+            fetch('/client/dunbar-user?access_token='+token)
             .then(res => res.json())
             .then(u => {
                 console.log("I know the user now.")
                 console.log(u)
-                agentURI = u["http://store.rerum.io/agent"]
-                agentLink.innerHTML = agentURI
-                sessionStorage.setItem('Agent-URI', agentURI)
-                sessionStorage.setItem('Dunbar-Token', getURLHash("access_token"))
-                alert(`Hello ${agentURI}!.  As you go around to the Dunbar apps, the Bearer ${getURLHash("access_token")} can be used to allow you access.`)
+                let a = u["http://store.rerum.io/agent"]
+                agentLink.innerHTML = a
+                sessionStorage.setItem('Agent-URI', a)
+                alert(`Hello ${a}!`)
             })
             .catch(err =>{
                 console.error(err)
-                alert("This access token is dead, so you probably logged out.  Try to login again at login.html for a new token")
-            }) 
+                sessionStorage.removeItem('Agent-URI')
+                sessionStorage.removeItem('Dunbar-Token')
+                agentLink.innerHTML = "Please login again.  Your session expired."
+                alert("You logged out or your session expired.  Try logging in again.")
+            })     
         }
-
-        //Go off to Auth0, come back with an Agent ID (upon successful login) or null (unsuccessful login)
+        else{
+            //They need to log in!
+        }
+            
         $("#register").click(ev => fetch('/client/connect')
         .then(res => {
             console.log(res)
@@ -165,7 +179,7 @@
             return false;
         }
 
-        function getURLHash(variable) {
+        function getURLHash(variable, url=document.location.href) {
             var query = document.location.hash;
             query = query.substr(1);
             var vars = query.split("&");
@@ -175,6 +189,41 @@
             }
             return false;
         }
+
+        /** Auth0 Heartbeat that keeps the access token fresh. Apps' responsibility.*/
+        setTimeout(async function(){
+          if(sessionStorage.getItem("Dunbar-Token")){
+            //You are registered/logged in but you access token has expired b/c it has a short life.  Silently refresh it if possible.
+            try{
+              let resp = await fetch("/client/revalidate").then(res=>res.json()).catch(err=>{return {}})
+              //This URL has an #access_token or #error
+              let error = resp.error ?? ""
+              let t = resp.access_token ?? ""
+              if(t){
+                //This user has continued their session, we we got a new token and can store it
+                sessionStorage.setItem("Dunbar-Token", t)  
+              }
+              else{
+                //This user did not continue their session, and so needs to log in again.
+                sessionStorage.removeItem("Dunbar-Token")
+                sessionStorage.removeItem("Agent-URI") 
+                console.log("Could not authorize silently.  Please login again.")
+                console.error(error)
+                //document.location.href = "login.html"
+              }
+            }
+            catch (e) {
+              //The authorize endpoint errored out and we could not validate you.  Please login again.
+              console.log("got to authorize error")
+              console.error(e)
+              sessionStorage.removeItem("Dunbar-Token")
+              sessionStorage.removeItem("Agent-URI")
+            }
+          }
+          else{
+            //You need to login to start a session!
+          }
+        }, 20000)
 
     </script>
 </body>
