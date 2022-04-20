@@ -10,6 +10,7 @@ dotenvExpand.expand(storedEnv)
 var logger = require('morgan')
 const cors = require('cors')
 const got = require('got')
+let beat = false
 
 var indexRouter = require('./routes/index.js')
 const clientRouter = require('./routes/client.js')

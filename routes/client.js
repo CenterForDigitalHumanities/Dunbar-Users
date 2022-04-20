@@ -25,6 +25,7 @@ router.get('/revalidate', async function(req,res,next){
     //This responds to applications with a fresh access token that can get /userinfo
       let params = {
           "audience":process.env.AUDIENCE,
+          //"scope":"name email openid profile offline_access",
           "grant_type" : "client_credentials",
           "client_id":process.env.CLIENTID,
           "client_secret":process.env.CLIENT_SECRET
@@ -32,18 +33,19 @@ router.get('/revalidate', async function(req,res,next){
       let headers = {
         "content-type" : 'application/x-www-form-urlencoded'
       }
-      let resp = await got.post("https://cubap.auth0.com/oauth/token", {"headers":headers, "form":params}).json()
-      res.status(200).json(resp)
+      const {body, statusCode} = await got.post("https://cubap.auth0.com/oauth/token", {"headers":headers, "form":params})
+      console.log(statusCode)
+      console.log(body)
+      let resp = body
+      if (statusCode !== 200 || body.error) {
+        resp = body.error
+      }
+      res.status(statusCode).json(body)
   })
 
 router.get('/disconnect', function(req,res,next){
   //This does not invalidate an access token.  They cannot be invalidated. 
   //See https://community.auth0.com/t/invalidating-an-access-token-when-user-logs-out/48365
-  /*
-    Logging out destroys the session on Auth0 in in browser, but not access tokens.
-    Access tokens cannot be revoked. They are self-contained, enabling verification by the backend without contacting Auth0 (except to get the signature verification keys which don’t change very often and should be cached). Thus there is no way to revoke them.
-    Make your access tokens shortlived because of this.
-  */
   var params = new URLSearchParams({
       "audience":process.env.AUDIENCE,
       "client_id":process.env.CLIENTID,
