@@ -12,13 +12,16 @@
          * It will have all the auth0 hash variables, as well as where to go next all in the URL.
          */ 
         const myURL = document.location.href
-        if (myURL.indexOf("app_redirect") > -1) {
-            //Auth0 Universal Login response prompted by Dunbar Users will redirect to this HTML page.
-            //Auth0 puts valuable information into the URL hash when redirecting to its redirect_uri (handle.html).
-            //The request should have contained an app_redirect to go to.  We want to go to that location with all the hash info.
+        if (myURL.indexOf("state") > -1) {
+            let state = getURLHash("state")
             let currentHash = location.hash
             //Whats do you want to do if app_redirect is not present?  We would be stuck on this page and not know what app to go to with the token.
-            document.location.href = getURLHash("app_redirect") + currentHash
+            if(sessionStorage.getItem(state)){
+                let json = JSON.parse(sessionStorage.getItem(state))
+                let redirect = json.redirectURL
+                sessionStorage.removeItem(state)
+                document.location.href = redirect + currentHash
+            }
         }
 
         /**

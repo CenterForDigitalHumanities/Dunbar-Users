@@ -114,8 +114,15 @@
     </div>
     <script type="text/javascript">
 
+        let redirection = "http://dunbar-letters.rerum.io/login.html"
+        let nonce = 
+        {
+            "redirectURL": redirection
+        }
+        sessionStorage.setItem("dunbar123", JSON.stringify(nonce))
+
         //Use the Universal Client Login for Registration with Dunbar Users (http://dunbar-users.rerum.io/client/connect?app_redirect=)
-        $("#register").click(ev => fetch('/client/connect?app_redirect=http://dunbar-letters.rerum.io/login.html')
+        $("#register").click(ev => fetch('/client/connect?app_redirect=http://localhost:3000/login.html')
         .then(res => {
             console.log(res)
             return res.text()
@@ -123,7 +130,7 @@
         .then(url => location.href = url))
 
         //Use the Universal Client Login with Dunbar Users (http://dunbar-users.rerum.io/client/connect?app_redirect=)
-        $("#login").click(ev => fetch('/client/connect?app_redirect=http://dunbar-letters.rerum.io/login.html')
+        $("#login").click(ev => fetch('/client/connect?app_redirect=http://localhost:3000/login.html')
         .then(res => {
             console.log(res)
             return res.text()
