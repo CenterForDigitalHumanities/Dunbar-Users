@@ -112,75 +112,12 @@
                 value="Login To Dunbar App" />
         </div>
     </div>
-    <script type="text/javascript" src="./script/heart.js"></script>
     <script type="text/javascript">
-        let agent_uri = ""
-        let agent_access_token = ""
-        let auth_code = ""
-        let error_code = ""
-        let responseJSON = {}
-        let myURL = document.location.href
-        let token = sessionStorage.getItem("Dunbar-Token") ?? ""
-        let agent = sessionStorage.getItem("Agent-URI") ?? ""
-
-        //Auth0 Login Widget was successful and it redirect here with the access token in the URL.
-        //Put the token in session storage and refresh the page.  We don't want it in the address bar.
-        if (myURL.indexOf("access_token=") > -1) {
-            //Auth0 adds this to redirects.  Remove it from the address bar.
-            sessionStorage.setItem('Dunbar-Token', getURLHash("access_token"))
-            document.location.href="login.html"
-        }
-        else if(token){
-            //A token was in sessionStorage, so there was a login during this window session.
-            //An access token is stored. Let's use it to get the user info.  If it fails, the user needs to login again.
-            fetch('/client/dunbar-user?access_token='+token)
-            .then(res => res.json())
-            .then(u => {
-                console.log("I know the user now.")
-                console.log(u)
-                let a = u["http://store.rerum.io/agent"]
-                agentLink.innerHTML = a
-                sessionStorage.setItem('Agent-URI', a)
-                alert(`Hello ${a}!`)
-                startHeartbeat()
-            })
-            .catch(err =>{
-                console.error(err)
-                sessionStorage.removeItem('Agent-URI')
-                sessionStorage.removeItem('Dunbar-Token')
-                agentLink.innerHTML = "Please login again.  Your session expired."
-                alert("You logged out or your session expired.  Try logging in again.")
-                stopHeartbeat()
-            })     
-        }
-        else{
-            //They need to log in!
-        }
-            
-        $("#register").click(ev => fetch('/client/connect')
-        .then(res => {
-            console.log(res)
-            return res.text()
-        })
-        .then(url => location.href = url))
-
-        //Go off to Auth0, come back with an Agent ID (upon successful login) or null (unsuccessful login)
-        $("#login").click(ev => fetch('/client/connect')
-        .then(res => {
-            console.log(res)
-            return res.text()
-        })
-        .then(url => location.href = url))
-
-        function getURLHash(variable, url=document.location.href) {
-            var query = url.substr(url.indexOf("#")+1)
-            var vars = query.split("&")
-            for (var i = 0; i < vars.length; i++) {
-                var pair = vars[i].split("=")
-                if (pair[0] == variable) { return pair[1] }
-            }
-            return false
-        }
+        
+        //Use the Universal Client Register with Dunbar Users (http://dunbar-users.rerum.io/client/connect?app_redirect=)
+        $("#register").click(ev => fetch('/client/connect?app_redirect=http://dunbar-letters.rerum.io/login.html')
+        //Use the Universal Client Register with Dunbar Users (http://dunbar-users.rerum.io/client/connect?app_redirect=)
+        $("#login").click(ev => fetch('/client/connect?app_redirect=http://dunbar-letters.rerum.io/login.html')
 
     </script>
 </body>

@@ -9,39 +9,41 @@ const auth = require('../auth')
 router.get('/connect', function(req,res,next){
   //Register or login using the Auth0 Widget (this will redirect the user to that widget, widget will redirect back with info)
   //This responds to applications with the link for logging in to the Dunbar Auth0 Client.
-      var params = new URLSearchParams({
-          "audience":process.env.AUDIENCE,
-          "scope":"name email openid profile offline_access",
-          "response_type":"token",
-          "client_id":process.env.CLIENTID,
-          "redirect_uri":process.env.DUNBAR_REDIRECT,
-          "state":"dunbar123"           
-      }).toString()
-      res.status(200).send("https://cubap.auth0.com/authorize?" + params)
-  })
+  let redirection = req.query.app_redirect ?? ""
+  var params = new URLSearchParams({
+      "audience":process.env.AUDIENCE,
+      "scope":"name email openid profile offline_access",
+      "response_type":"token",
+      "client_id":process.env.CLIENTID,
+      "redirect_uri":process.env.DUNBAR_REDIRECT,
+      "state":"dunbar123",
+      "app_redirect" : redirection           
+  }).toString()
+  res.status(200).send("https://cubap.auth0.com/authorize?" + params)
+})
 
 router.get('/revalidate', async function(req,res,next){
     //access tokens only live for 30 seconds.
     //This responds to applications with a fresh access token that can get /userinfo
-      let params = {
-          "audience":process.env.AUDIENCE,
-          //"scope":"name email openid profile offline_access",
-          "grant_type" : "client_credentials",
-          "client_id":process.env.CLIENTID,
-          "client_secret":process.env.CLIENT_SECRET
-      }
-      let headers = {
-        "content-type" : 'application/x-www-form-urlencoded'
-      }
-      const {body, statusCode} = await got.post("https://cubap.auth0.com/oauth/token", {"headers":headers, "form":params})
-      console.log(statusCode)
-      console.log(body)
-      let resp = body
-      if (statusCode !== 200 || body.error) {
-        resp = body.error
-      }
-      res.status(statusCode).json(body)
-  })
+    let params = {
+        "audience":process.env.AUDIENCE,
+        //"scope":"name email openid profile offline_access",
+        "grant_type" : "client_credentials",
+        "client_id":process.env.CLIENTID,
+        "client_secret":process.env.CLIENT_SECRET
+    }
+    let headers = {
+      "content-type" : 'application/x-www-form-urlencoded'
+    }
+    const {body, statusCode} = await got.post("https://cubap.auth0.com/oauth/token", {"headers":headers, "form":params})
+    console.log(statusCode)
+    console.log(body)
+    let resp = body
+    if (statusCode !== 200 || body.error) {
+      resp = body.error
+    }
+    res.status(statusCode).json(body)
+})
 
 router.get('/disconnect', function(req,res,next){
   //This does not invalidate an access token.  They cannot be invalidated. 
