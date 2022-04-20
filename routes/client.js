@@ -9,13 +9,14 @@ const auth = require('../auth')
 router.get('/connect', function(req,res,next){
   //Register or login using the Auth0 Widget (this will redirect the user to that widget, widget will redirect back with info)
   //This responds to applications with the link for logging in to the Dunbar Auth0 Client.
+  let state = req.query.state
   var params = new URLSearchParams({
       "audience":process.env.AUDIENCE,
       "scope":"name email openid profile offline_access",
       "response_type":"token",
       "client_id":process.env.CLIENTID,
       "redirect_uri":process.env.DUNBAR_REDIRECT,
-      "state":"dunbar123"
+      "state":state
       //"app_redirect" : redirection           
   }).toString()
   res.status(200).send("https://cubap.auth0.com/authorize?" + params)
