@@ -17,7 +17,7 @@
             //Auth0 puts valuable information into the URL hash when redirecting to its redirect_uri (handle.html).
             //The request should have contained an app_redirect to go to.  We want to go to that location with all the hash info.
             let currentHash = location.hash
-            //What do you want to do if app_redirect is not present?  We would be stuck on this page and not know what app to go to with the token.
+            //Whats do you want to do if app_redirect is not present?  We would be stuck on this page and not know what app to go to with the token.
             document.location.href = getURLHash("app_redirect") + currentHash
         }
 
