@@ -113,11 +113,22 @@
         </div>
     </div>
     <script type="text/javascript">
-        
-        //Use the Universal Client Register with Dunbar Users (http://dunbar-users.rerum.io/client/connect?app_redirect=)
+
+        //Use the Universal Client Login for Registration with Dunbar Users (http://dunbar-users.rerum.io/client/connect?app_redirect=)
         $("#register").click(ev => fetch('/client/connect?app_redirect=http://dunbar-letters.rerum.io/login.html')
-        //Use the Universal Client Register with Dunbar Users (http://dunbar-users.rerum.io/client/connect?app_redirect=)
+        .then(res => {
+            console.log(res)
+            return res.text()
+        })
+        .then(url => location.href = url))
+
+        //Use the Universal Client Login with Dunbar Users (http://dunbar-users.rerum.io/client/connect?app_redirect=)
         $("#login").click(ev => fetch('/client/connect?app_redirect=http://dunbar-letters.rerum.io/login.html')
+        .then(res => {
+            console.log(res)
+            return res.text()
+        })
+        .then(url => location.href = url))
 
     </script>
 </body>
