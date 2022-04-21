@@ -86,21 +86,10 @@
         </p>
     </div>
     <div class='panel panel-info' name="block">
-        <div class="panel-heading"> <span class="panel-title">Dunbar App Registration</span> </div>
+        <div class="panel-heading"> <span class="panel-title">Admin Login</span> </div>
         <div class="panel-body">
             <p class="handHoldy">
-                After registering, you will be returned to this page with an Auth0 Token with your agent encoded or a response with the agent in it or something, whatever. <br>
-            </p>
-        </div>
-        <div class="panel-footer">
-            <input class='btn btn-primary btn-large' type="button" id="register" value="Register with the Dunbar App" />
-        </div>
-    </div>
-    <div class='panel panel-info' name="block">
-        <div class="panel-heading"> <span class="panel-title">Existing User Login</span> </div>
-        <div class="panel-body">
-            <p class="handHoldy">
-                If you have registered with the Dunbar app already, login below.
+                Admins can log in below.
             </p>
             <div>
                 <span class="status_header"> Dunbar App Agent </span>
@@ -109,33 +98,96 @@
         </div>
         <div class="panel-footer">
             <input class='btn btn-primary btn-large' type="button" id="login"
-                value="Login To Dunbar App" />
+                value="Login To Dunbar User Management" />
         </div>
     </div>
+    <script src="https://cdn.auth0.com/js/auth0/9.19.0/auth0.min.js"></script>
     <script type="text/javascript">
 
-        let redirection = "http://dunbar-letters.rerum.io/login.html"
-        let nonce = 
-        {
-            "redirectURL": redirection
-        }
-        sessionStorage.setItem("dunbar123", JSON.stringify(nonce))
+        let token = sessionStorage.getItem("Dunbar-Token")
+        let agent = sessionStorage.getItem("Agent-URI")
 
-        //Use the Universal Client Login for Registration with Dunbar Users (http://dunbar-users.rerum.io/client/connect?app_redirect=)
-        $("#register").click(ev => fetch('/client/connect?state=dunbar123')
-        .then(res => {
-            console.log(res)
-            return res.text()
-        })
-        .then(url => location.href = url))
+        //Auth0 Login Widget was successful and it redirect here with the access token in the URL.
+        //Put the token in session storage and refresh the page.  We don't want it in the address bar.
+        if (myURL.indexOf("access_token=") > -1) {
+            //Auth0 adds this to redirects.  Remove it from the address bar.
+            sessionStorage.setItem('Dunbar-Token', getURLHash("access_token"))
+            document.location.href="login.html"
+        }
+        else if(token){
+            //A token was in sessionStorage, so there was a login during this window session.
+            //An access token is stored. Let's use it to get the user info.  If it fails, the user needs to login again.
+            fetch('/client/dunbar-user?access_token='+token)
+            .then(res => res.json())
+            .then(u => {
+                console.log("I know the user now.")
+                console.log(u)
+                let a = u["http://store.rerum.io/agent"]
+                agentLink.innerHTML = a
+                sessionStorage.setItem('Agent-URI', a)
+                alert(`Hello ${a}!`)
+            })
+            .catch(err =>{
+                console.error(err)
+                sessionStorage.removeItem('Agent-URI')
+                sessionStorage.removeItem('Dunbar-Token')
+                agentLink.innerHTML = "Please login again.  Your session expired."
+                alert("You logged out or your session expired.  Try logging in again.")
+            })     
+        }
+        else{
+            //They need to log in!
+        }
 
         //Use the Universal Client Login with Dunbar Users (http://dunbar-users.rerum.io/client/connect?app_redirect=)
-        $("#login").click(ev => fetch('/client/connect?state=dunbar123')
+        $("#login").click(ev => fetch('/manage/connect')
         .then(res => {
             console.log(res)
             return res.text()
         })
         .then(url => location.href = url))
+
+        //OR just do it with a popup
+        $("#login").click(ev => {
+            const AUDIENCE = "http://dunbar-users.rerum.io/api"
+            const ISSUER_BASE_URL = "cubap.auth0.com"
+            const CLIENTID = "z1DuwzGPYKmF7POW9LiAipO5MvKSDERM"
+            const DUNBAR_REDIRECT = "manage.html"
+
+            var webAuth = new auth0.WebAuth({
+                domain:       ISSUER_BASE_URL,
+                clientID:     CLIENTID
+            })
+            webAuth.popup.authorize({
+                "audience":AUDIENCE,
+                "scope":"name email openid profile offline_access",
+                "redirectUri": DUNBAR_REDIRECT,
+                "responseType" : "token",
+                "clientId" : CLIENTID,
+                "state" : "dunbar123"
+              //Any additional options can go here
+            }, function(err, authResult) {
+                webAuth.client.userInfo(authResult.accessToken, function(err, u) {
+                    console.log("I know the user now.")
+                    console.log(u)
+                    let agentURI = u["http://store.rerum.io/agent"]
+                    sessionStorage.setItem('Agent-URI', agentURI)
+                    sessionStorage.setItem('Dunbar-Token', authResult.accessToken)
+                })
+            })
+        })
+
+        //Or send them off to Universal Login and bring them back here with #access_token
+        $("#login").click(ev => {
+            auth0.authorize({
+               "audience":AUDIENCE,
+                "scope":"name email openid profile offline_access",
+                "redirectUri": DUNBAR_REDIRECT,
+                "responseType" : "token",
+                "clientId" : CLIENTID,
+                "state" : "dunbar123"
+            })
+        })
 
     </script>
 </body>

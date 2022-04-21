@@ -5,14 +5,14 @@
  */  
 let beat = false
 function startHeartbeat(){
-  //Auth0 Heartbeat that keeps the access token fresh.
+  /** Auth0 Heartbeat that keeps the access token fresh. Apps' responsibility.*/
     beat = setInterval(async function(){
       console.log("beat...")
       if(sessionStorage.getItem("Dunbar-Token")){
         console.log("token")
         //You are registered/logged in but you access token has expired b/c it has a short life.  Silently refresh it if possible.
         try{
-          let resp = await fetch("/manage/revalidate").then(res=>res.json()).catch(err=>{return err})
+          let resp = await fetch("/client/revalidate").then(res=>res.json()).catch(err=>{return err})
           resp = JSON.parse(resp)
           let t = resp.access_token ?? ""
           if(t){

@@ -10,10 +10,9 @@ dotenvExpand.expand(storedEnv)
 var logger = require('morgan')
 const cors = require('cors')
 const got = require('got')
-let beat = false
 
-var indexRouter = require('./routes/index.js')
-const clientRouter = require('./routes/client.js')
+const indexRouter = require('./routes/index.js')
+const managementRouter = require('./routes/manage.js')
 
 var app = express()
 
@@ -65,7 +64,7 @@ app.use(express.static(path.join(__dirname, 'public')))
 
 app.use('/', indexRouter)
 
-app.use('/client', clientRouter)
+app.use('/manage', managementRouter)
 
 //catch 404 because of an invalid site path
 app.use(function(req, res, next) {
