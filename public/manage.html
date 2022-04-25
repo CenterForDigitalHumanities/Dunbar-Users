@@ -256,7 +256,10 @@
         }
 
         async function getAllUsers(){
-            let users = await fetch("https://cubap.auth0.com/api/v2/users", {
+            // ooo we need to add a query to this that filters for Dunbar Apps users only...right now all users are returned (even the bot)
+            // https://auth0.com/docs/manage-users/user-search/user-search-query-syntax
+            // We can search by app_metadata, user_metadata and profile info
+            let users = await fetch('https://cubap.auth0.com/api/v2/users?q=app_metadata.app:"Dunbar"', {
                 method: 'GET', 
                 cache: 'default',
                 headers: {
