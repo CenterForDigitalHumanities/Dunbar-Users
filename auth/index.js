@@ -39,7 +39,7 @@ const verifyAccess = (secret) => {
     return jwt({
         secret,
         audience: process.env.AUDIENCE,
-        issuer: `https://dunbar-users.rerum.io/`,
+        issuer: `https://cubap.auth0.com/api/v2/`,
         algorithms: ['RS256']
     })
 }

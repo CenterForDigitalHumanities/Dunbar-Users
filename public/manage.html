@@ -64,7 +64,7 @@
 </head>
 
 <body>
-    <h1 onclick="window.location='https://dunbar-users.rerum.io'" target="_blank" class="navbar-brand"><i class="fa fa-cubes"></i>
+    <h1 onclick="window.location='login.html'" target="_blank" class="navbar-brand"><i class="fa fa-cubes"></i>
         dunbar</h1>
     <div class='' id="intro">
         <p>
@@ -87,6 +87,7 @@
                 value="Login To Dunbar User Management" />
         </div>
     </div>
+    <script src="https://cdn.auth0.com/js/auth0/9.19.0/auth0.min.js"></script>
     <script type="text/javascript" src="./script/heart.js"></script>
     <script type="text/javascript">
         //This is an Auth0 Bearer, a management access token
@@ -95,6 +96,7 @@
         let agent = sessionStorage.getItem("Agent-URI")
         //This is an Auth0 User Profile
         let user = sessionStorage.getItem("Dunbar-User")
+        const myURL = document.location.href
 
         //If this is in the address bar, then it means we are resetting the user and token in storage.  Don't trust the ones you have.
         if (myURL.indexOf("access_token=") > -1) {
@@ -132,23 +134,6 @@
         else{
             //They need to log in!
             alert("You logged out or your session expired.  Try logging in again.")
-        }
-
-        /**
-         * The redirect from the auth0 Universal Login widget for Dunbar Users comes here.
-         * It will have all the auth0 hash variables, as well as where to go next all in the URL.
-         */ 
-        const myURL = document.location.href
-        if (myURL.indexOf("state") > -1) {
-            let state = getURLHash("state")
-            let currentHash = location.hash
-            //Whats do you want to do if app_redirect is not present?  We would be stuck on this page and not know what app to go to with the token.
-            if(sessionStorage.getItem(state)){
-                let json = JSON.parse(sessionStorage.getItem(state))
-                let redirect = json.redirectURL
-                sessionStorage.removeItem(state)
-                document.location.href = redirect + currentHash
-            }
         }
 
         /**

@@ -78,7 +78,7 @@
 </head>
 
 <body class="container">
-    <h1 onclick="window.location='https://dunbar-users.rerum.io'" target="_blank" class="navbar-brand"><i class="fa fa-cubes"></i>
+    <h1 onclick="window.location='login.html'" target="_blank" class="navbar-brand"><i class="fa fa-cubes"></i>
         dunbar</h1>
     <div class='' id="intro">
         <p>
@@ -104,6 +104,14 @@
     <script src="https://cdn.auth0.com/js/auth0/9.19.0/auth0.min.js"></script>
     <script type="text/javascript" src="./script/heart.js"></script>
     <script type="text/javascript">
+        const AUDIENCE = "https://cubap.auth0.com/api/v2/"
+        const ISSUER_BASE_URL = "cubap.auth0.com"
+        const CLIENTID = "z1DuwzGPYKmF7POW9LiAipO5MvKSDERM"
+        const DUNBAR_REDIRECT = "http://localhost:3000/manage.html"
+        const DOMAIN = "cubap.auth0.com"
+
+        let webAuth = null
+        let manager = null
 
         //Keep these in session when appropriate, to help avoid as many async calls as possible.
 
@@ -112,34 +120,74 @@
         //This is a RERUM v1 Agent
         let agent = sessionStorage.getItem("Agent-URI")
         //This is an Auth0 User Profile
+        //TODO how do i know if this user is an admin?
         let user = sessionStorage.getItem("Dunbar-User")
 
         if(token){
             //A token was in sessionStorage, so there was a login during this window session.
-            //An access token is stored. Let's use it to get the user info.  If it fails, the user needs to login again.
-            fetch('/client/dunbar-user?access_token='+token)
-            .then(res => res.json())
-            .then(u => {
-                console.log("I know the user now.")
-                console.log(u)
-                let a = u["http://store.rerum.io/agent"]
-                agentLink.innerHTML = a
-                sessionStorage.setItem('Agent-URI', a)
-                sessionStorage.setItem('Dunbar-User', u)
-                alert(`Hello ${a}!`)
+            //This manager cannot be used to access OTHER USERS' info
+            manager = new auth0.Management({
+              "domain": DOMAIN,
+              "token": token
             })
-            .catch(err =>{
-                console.error(err)
-                sessionStorage.removeItem('Agent-URI')
-                sessionStorage.removeItem('Dunbar-Token')
-                sessionStorage.removeItem('Dunbar-User')
-                agentLink.innerHTML = "Please login again.  Your session expired."
-                alert("You logged out or your session expired.  Try logging in again.")
-            })     
+            //An access token is stored. Let's use it to get THIS USER's info.  If it fails, the user needs to login again.
+            manager.getUser(user.sub, function(err, u){
+                if(err){
+
+                }
+                else{
+                    console.log("I know the user now.")
+                    console.log(u)
+                    let a = u["http://store.rerum.io/agent"]
+                    agentLink.innerHTML = a
+                    sessionStorage.setItem('Agent-URI', a)
+                    sessionStorage.setItem('Dunbar-User', u)
+                    alert(`Hello ${a}!`)    
+                }
+            })
+            //Get users from our back end?
+            /*
+                fetch('/client/dunbar-user?access_token='+token)
+                .then(res => res.json())
+                .then(u => {
+                    console.log("I know the user now.")
+                    console.log(u)
+                    let a = u["http://store.rerum.io/agent"]
+                    agentLink.innerHTML = a
+                    sessionStorage.setItem('Agent-URI', a)
+                    sessionStorage.setItem('Dunbar-User', u)
+                    alert(`Hello ${a}!`)
+                })
+                .catch(err =>{
+                    console.error(err)
+                    sessionStorage.removeItem('Agent-URI')
+                    sessionStorage.removeItem('Dunbar-Token')
+                    sessionStorage.removeItem('Dunbar-User')
+                    agentLink.innerHTML = "Please login again.  Your session expired."
+                    alert("You logged out or your session expired.  Try logging in again.")
+                })     
+            */
         }
         else{
             //They need to log in!
         }
+
+        //send them off to Universal Login and bring them back here with #access_token
+        $("#login").click(ev => {
+            webAuth = new auth0.WebAuth({
+                domain:       ISSUER_BASE_URL,
+                clientID:     CLIENTID
+            })
+            webAuth.authorize({
+                "audience":AUDIENCE,
+                "scope":"read:users update:users profile openid offline_access",
+                "redirectUri": DUNBAR_REDIRECT,
+                "responseType" : "token",
+                "clientId" : CLIENTID,
+                "state" : "dunbar123"
+              //Any additional options can go here
+            })
+        })     
 
         //Use the Universal Client Login via our own back end
         /*
@@ -151,48 +199,38 @@
         .then(url => location.href = url))
         */
 
-        //OR just do it with a popup
-        $("#login").click(ev => {
-            const AUDIENCE = "http://dunbar-users.rerum.io/api"
-            const ISSUER_BASE_URL = "cubap.auth0.com"
-            const CLIENTID = "z1DuwzGPYKmF7POW9LiAipO5MvKSDERM"
-            const DUNBAR_REDIRECT = "manage.html"
+        //Do it with a popup
+        //Hmm this wasn't quite what I thought.
 
-            var webAuth = new auth0.WebAuth({
+        /*
+        $("#login").click(ev => {
+            webAuth = new auth0.WebAuth({
                 domain:       ISSUER_BASE_URL,
                 clientID:     CLIENTID
             })
             webAuth.popup.authorize({
                 "audience":AUDIENCE,
-                "scope":"name email openid profile offline_access",
+                "scope":"read:users update:users profile openid offline_access",
                 "redirectUri": DUNBAR_REDIRECT,
                 "responseType" : "token",
                 "clientId" : CLIENTID,
-                "state" : "dunbar123"
+                "state" : "dunbar123",
+                "autoClose" : true
               //Any additional options can go here
             }, function(err, authResult) {
                 webAuth.client.userInfo(authResult.accessToken, function(err, u) {
-                    console.log("I know the user now.")
+                    console.log("I know the user trying to log in now.")
                     console.log(u)
                     let agentURI = u["http://store.rerum.io/agent"]
+                    agent = agentURI
+                    token = authResult.accessToken
+                    user = u
                     sessionStorage.setItem('Agent-URI', agentURI)
                     sessionStorage.setItem('Dunbar-Token', authResult.accessToken)
                     sessionStorage.setItem('Dunbar-User', u)
                 })
             })
-        })
-
-        //Or send them off to Universal Login and bring them back here with #access_token
-        /*
-        $("#login").click(ev => {
-            auth0.authorize({
-               "audience":AUDIENCE,
-                "scope":"name email openid profile offline_access",
-                "redirectUri": DUNBAR_REDIRECT,
-                "responseType" : "token",
-                "clientId" : CLIENTID,
-                "state" : "dunbar123"
-            })
+            webAuth.popup.callback()
         })
         */
 
