@@ -25,6 +25,7 @@ function startHeartbeat(){
             //console.log("No access token in start heartbeat")
             sessionStorage.removeItem("Dunbar-Token")
             sessionStorage.removeItem("Agent-URI") 
+            sessionStorage.removeItem("Dunbar-User")
             console.log("Could not authorize silently.  Please login again.")
             stopHeartbeat()
             console.error(resp)
@@ -37,6 +38,7 @@ function startHeartbeat(){
           console.error(e)
           sessionStorage.removeItem("Dunbar-Token")
           sessionStorage.removeItem("Agent-URI")
+          sessionStorage.removeItem("Dunbar-User")
           stopHeartbeat()
         }
       }

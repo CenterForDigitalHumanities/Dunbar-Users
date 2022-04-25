@@ -3,6 +3,7 @@
 
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <title>Dunbar Users Portal</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
@@ -59,30 +60,15 @@
         .status_header {
             color: gray;
         }
-    
-        #a_t {
-            height: 170px;
-            margin-bottom: 8px;
-        }
-    
-        #a_t,
-        #r_t_4_a_t,
-        #new_refresh_token {
-            margin-bottom: 8px;
-        }
-    
-        #code_for_refresh_token {
-            margin-bottom: -13px;
-        }
     </style>
 </head>
 
-<body class="container">
+<body>
     <h1 onclick="window.location='https://dunbar-users.rerum.io'" target="_blank" class="navbar-brand"><i class="fa fa-cubes"></i>
         dunbar</h1>
     <div class='' id="intro">
         <p>
-            We are so glad you are interested in researching the works of Paul Dunbar.
+            Manage the users for the Dunbar connected apps.
         </p>
     </div>
     <div class='panel panel-info' name="block">
@@ -101,12 +87,8 @@
                 value="Login To Dunbar User Management" />
         </div>
     </div>
-    <script src="https://cdn.auth0.com/js/auth0/9.19.0/auth0.min.js"></script>
     <script type="text/javascript" src="./script/heart.js"></script>
     <script type="text/javascript">
-
-        //Keep these in session when appropriate, to help avoid as many async calls as possible.
-
         //This is an Auth0 Bearer, a management access token
         let token = sessionStorage.getItem("Dunbar-Token")
         //This is a RERUM v1 Agent
@@ -114,6 +96,16 @@
         //This is an Auth0 User Profile
         let user = sessionStorage.getItem("Dunbar-User")
 
+        //If this is in the address bar, then it means we are resetting the user and token in storage.  Don't trust the ones you have.
+        if (myURL.indexOf("access_token=") > -1) {
+            //Auth0 Login Widget was successful and it redirect here with the access token in the URL.
+            //Put the token in session storage and refresh the page.  We don't want it in the address bar.
+            token = getURLHash("access_token")
+            sessionStorage.setItem('Dunbar-Token', token)
+            //document.location.href="login.html"
+        }
+
+        //You can trust the token.  However, it may have expired.
         if(token){
             //A token was in sessionStorage, so there was a login during this window session.
             //An access token is stored. Let's use it to get the user info.  If it fails, the user needs to login again.
@@ -139,62 +131,39 @@
         }
         else{
             //They need to log in!
+            alert("You logged out or your session expired.  Try logging in again.")
         }
 
-        //Use the Universal Client Login via our own back end
-        /*
-        $("#login").click(ev => fetch('/manage/connect')
-        .then(res => {
-            console.log(res)
-            return res.text()
-        })
-        .then(url => location.href = url))
-        */
+        /**
+         * The redirect from the auth0 Universal Login widget for Dunbar Users comes here.
+         * It will have all the auth0 hash variables, as well as where to go next all in the URL.
+         */ 
+        const myURL = document.location.href
+        if (myURL.indexOf("state") > -1) {
+            let state = getURLHash("state")
+            let currentHash = location.hash
+            //Whats do you want to do if app_redirect is not present?  We would be stuck on this page and not know what app to go to with the token.
+            if(sessionStorage.getItem(state)){
+                let json = JSON.parse(sessionStorage.getItem(state))
+                let redirect = json.redirectURL
+                sessionStorage.removeItem(state)
+                document.location.href = redirect + currentHash
+            }
+        }
 
-        //OR just do it with a popup
-        $("#login").click(ev => {
-            const AUDIENCE = "http://dunbar-users.rerum.io/api"
-            const ISSUER_BASE_URL = "cubap.auth0.com"
-            const CLIENTID = "z1DuwzGPYKmF7POW9LiAipO5MvKSDERM"
-            const DUNBAR_REDIRECT = "manage.html"
-
-            var webAuth = new auth0.WebAuth({
-                domain:       ISSUER_BASE_URL,
-                clientID:     CLIENTID
-            })
-            webAuth.popup.authorize({
-                "audience":AUDIENCE,
-                "scope":"name email openid profile offline_access",
-                "redirectUri": DUNBAR_REDIRECT,
-                "responseType" : "token",
-                "clientId" : CLIENTID,
-                "state" : "dunbar123"
-              //Any additional options can go here
-            }, function(err, authResult) {
-                webAuth.client.userInfo(authResult.accessToken, function(err, u) {
-                    console.log("I know the user now.")
-                    console.log(u)
-                    let agentURI = u["http://store.rerum.io/agent"]
-                    sessionStorage.setItem('Agent-URI', agentURI)
-                    sessionStorage.setItem('Dunbar-Token', authResult.accessToken)
-                    sessionStorage.setItem('Dunbar-User', u)
-                })
-            })
-        })
-
-        //Or send them off to Universal Login and bring them back here with #access_token
-        /*
-        $("#login").click(ev => {
-            auth0.authorize({
-               "audience":AUDIENCE,
-                "scope":"name email openid profile offline_access",
-                "redirectUri": DUNBAR_REDIRECT,
-                "responseType" : "token",
-                "clientId" : CLIENTID,
-                "state" : "dunbar123"
-            })
-        })
-        */
+        /**
+         * Auth0 redirects here with a bunch of info in hash variables.
+         * This function allows you pull a single variable from the hash
+         */  
+        function getURLHash(variable, url=document.location.href) {
+            var query = url.substr(url.indexOf("#")+1)
+            var vars = query.split("&")
+            for (var i = 0; i < vars.length; i++) {
+                var pair = vars[i].split("=")
+                if (pair[0] == variable) { return pair[1] }
+            }
+            return false
+        }
 
     </script>
 </body>

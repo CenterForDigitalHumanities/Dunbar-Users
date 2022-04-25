@@ -5,15 +5,16 @@ const got = require('got')
 const auth = require('../auth')
 
 //Behind the scenes the Client Credentials Grant is used to obtain the access_token and is by default cached for the duration of the returned expires_in value
-var auth0 = new ManagementClient({
+let auth0 = new ManagementClient({
   domain: process.env.DOMAIN,
   clientId: process.env.CLIENTID,
+  clientSecret: process.env.CLIENT_SECRET,
   scope: 'read:users update:users profile',
 })
 
 router.get('/connect', function(req,res,next){
   //Send the user off to login, return them to manage.html and caches their access token
-  var params = new URLSearchParams({
+  let params = new URLSearchParams({
       "audience":process.env.AUDIENCE,
       "scope":"read:users update:users profile openid offline_access",
       "response_type":"token",
@@ -23,8 +24,7 @@ router.get('/connect', function(req,res,next){
   res.status(200).send("https://cubap.auth0.com/authorize?" + params)
 })
 
-router.get('/disconnect', function(req,res,next){\
-
+router.get('/disconnect', function(req,res,next){
   res.status(200).send("Hello World")
 })
 
@@ -35,8 +35,8 @@ router.get('/revalidate', async function(req,res,next){
     //This credentials grant will fail in the access token in cache is already expired.  They will have to log in again.
       auth0.clientCredentialsGrant(
       {
-        audience: 'https://{YOUR_ACCOUNT}.auth0.com/api/v2/',
-        scope: '{MANAGEMENT_API_SCOPES}',
+        "audience":process.env.AUDIENCE,
+        "scope":"read:users update:users profile openid offline_access",
       },
       function (err, response) {
         if (err) {
@@ -51,7 +51,6 @@ router.get('/revalidate', async function(req,res,next){
     //If there is no access token in cache, then we know there will be no authorization.  Login again.
     res.status(400).send("Your request does not contain an access token.")
   }  
-  
 })
 
 router.get('/getAllUsers', async function(req,res,next){
@@ -87,3 +86,14 @@ router.get('/updateUserProfile', async function(req,res,next){
   }
 })
 
+function getURLHash(variable, url) {
+    var query = url.substr(url.indexOf("#")+1)
+    var vars = query.split("&")
+    for (var i = 0; i < vars.length; i++) {
+        var pair = vars[i].split("=")
+        if (pair[0] == variable) { return pair[1] }
+    }
+    return false
+}
+
+module.exports = router
