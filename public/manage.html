@@ -63,7 +63,7 @@
     </style>
 </head>
 
-<body>
+<body class="container">
     <h1 onclick="window.location='login.html'" target="_blank" class="navbar-brand"><i class="fa fa-cubes"></i>
         dunbar</h1>
     <div class='' id="intro">
@@ -90,13 +90,26 @@
     <script src="https://cdn.auth0.com/js/auth0/9.19.0/auth0.min.js"></script>
     <script type="text/javascript" src="./script/heart.js"></script>
     <script type="text/javascript">
+const AUDIENCE = "https://cubap.auth0.com/api/v2/"
+        const ISSUER_BASE_URL = "cubap.auth0.com"
+        const CLIENTID = "z1DuwzGPYKmF7POW9LiAipO5MvKSDERM"
+        const DUNBAR_REDIRECT = "http://localhost:3000/manage.html"
+        const DOMAIN = "cubap.auth0.com"
+        const myURL = document.location.href
+
+        let webAuth = null
+        let manager = null
+
+        //Keep these in session when appropriate, to help avoid as many async calls as possible.
+
         //This is an Auth0 Bearer, a management access token
         let token = sessionStorage.getItem("Dunbar-Token")
         //This is a RERUM v1 Agent
         let agent = sessionStorage.getItem("Agent-URI")
         //This is an Auth0 User Profile
+        //TODO how do i know if this user is an admin?
         let user = sessionStorage.getItem("Dunbar-User")
-        const myURL = document.location.href
+        
 
         //If this is in the address bar, then it means we are resetting the user and token in storage.  Don't trust the ones you have.
         if (myURL.indexOf("access_token=") > -1) {
@@ -110,7 +123,33 @@
         //You can trust the token.  However, it may have expired.
         if(token){
             //A token was in sessionStorage, so there was a login during this window session.
-            //An access token is stored. Let's use it to get the user info.  If it fails, the user needs to login again.
+            manager = new auth0.Management({
+              "domain": DOMAIN,
+              "token": token
+            })
+            //An access token is stored. Let's use it to get THIS USER's info.  If it fails, the user needs to login again.
+            manager.getUser(user.sub, function(err, u){
+                if(err){
+                    console.error(err)
+                    sessionStorage.removeItem('Agent-URI')
+                    sessionStorage.removeItem('Dunbar-Token')
+                    sessionStorage.removeItem('Dunbar-User')
+                    agentLink.innerHTML = "Please login again.  Your session expired."
+                    alert("You logged out or your session expired.  Try logging in again.")
+                }
+                else{
+                    console.log("I know the user now.")
+                    console.log(u)
+                    let a = u["http://store.rerum.io/agent"]
+                    agentLink.innerHTML = a
+                    sessionStorage.setItem('Agent-URI', a)
+                    sessionStorage.setItem('Dunbar-User', u)
+                    alert(`Hello ${a}!`)    
+                }
+            })
+
+            //Get user using our back end?
+            /*
             fetch('/client/dunbar-user?access_token='+token)
             .then(res => res.json())
             .then(u => {
@@ -129,7 +168,8 @@
                 sessionStorage.removeItem('Dunbar-User')
                 agentLink.innerHTML = "Please login again.  Your session expired."
                 alert("You logged out or your session expired.  Try logging in again.")
-            })     
+            })    
+            */ 
         }
         else{
             //They need to log in!
