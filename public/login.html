@@ -104,6 +104,7 @@
     <script src="https://cdn.auth0.com/js/auth0/9.19.0/auth0.min.js"></script>
     <script type="text/javascript" src="./script/heart.js"></script>
     <script type="text/javascript">
+
         const AUDIENCE = "https://cubap.auth0.com/api/v2/"
         const ISSUER_BASE_URL = "cubap.auth0.com"
         const CLIENTID = "z1DuwzGPYKmF7POW9LiAipO5MvKSDERM"
@@ -121,52 +122,26 @@
         let agent = sessionStorage.getItem("Agent-URI")
         //This is an Auth0 User Profile
         //TODO how do i know if this user is an admin?
-        let user = sessionStorage.getItem("Dunbar-User")
+        let user = sessionStorage.getItem("Dunbar-User") ? JSON.parse(sessionStorage.getItem("Dunbar-User")) : {}
 
         if(token){
             //A token was in sessionStorage, so there was a login during this window session.
             //This manager cannot be used to access OTHER USERS' info
-            manager = new auth0.Management({
-              "domain": DOMAIN,
-              "token": token
+            let authenticator = new auth0.Authentication({
+                domain:       ISSUER_BASE_URL,
+                clientID:     CLIENTID
             })
             //An access token is stored. Let's use it to get THIS USER's info.  If it fails, the user needs to login again.
-            manager.getUser(user.sub, function(err, u){
+            authenticator.userInfo(token, function(err, u){
                 if(err){
-
+                    alert("Your session may have expired.  Please login again.")
                 }
                 else{
-                    console.log("I know the user now.")
-                    console.log(u)
-                    let a = u["http://store.rerum.io/agent"]
-                    agentLink.innerHTML = a
-                    sessionStorage.setItem('Agent-URI', a)
-                    sessionStorage.setItem('Dunbar-User', u)
-                    alert(`Hello ${a}!`)    
+                    sessionStorage.setItem('Agent-URI', u["http://store.rerum.io/agent"])
+                    sessionStorage.setItem('Dunbar-User', JSON.stringify(u))
+                    document.location.href="manage.html"
                 }
             })
-            //Get users from our back end?
-            /*
-                fetch('/client/dunbar-user?access_token='+token)
-                .then(res => res.json())
-                .then(u => {
-                    console.log("I know the user now.")
-                    console.log(u)
-                    let a = u["http://store.rerum.io/agent"]
-                    agentLink.innerHTML = a
-                    sessionStorage.setItem('Agent-URI', a)
-                    sessionStorage.setItem('Dunbar-User', u)
-                    alert(`Hello ${a}!`)
-                })
-                .catch(err =>{
-                    console.error(err)
-                    sessionStorage.removeItem('Agent-URI')
-                    sessionStorage.removeItem('Dunbar-Token')
-                    sessionStorage.removeItem('Dunbar-User')
-                    agentLink.innerHTML = "Please login again.  Your session expired."
-                    alert("You logged out or your session expired.  Try logging in again.")
-                })     
-            */
         }
         else{
             //They need to log in!
@@ -175,12 +150,14 @@
         //send them off to Universal Login and bring them back here with #access_token
         $("#login").click(ev => {
             webAuth = new auth0.WebAuth({
-                domain:       ISSUER_BASE_URL,
-                clientID:     CLIENTID
+                "domain":       DOMAIN,
+                "clientID":     CLIENTID,
+                "audience":   AUDIENCE,
+                "scope":"create:users read:users read:user_idp_tokens update:users delete:users read:roles create:roles update:roles delete:roles profile openid offline_access",
             })
             webAuth.authorize({
                 "audience":AUDIENCE,
-                "scope":"read:users update:users profile openid offline_access",
+                "scope":"create:users read:users read:user_idp_tokens update:users delete:users read:roles create:roles update:roles delete:roles profile openid offline_access",
                 "redirectUri": DUNBAR_REDIRECT,
                 "responseType" : "token",
                 "clientId" : CLIENTID,
@@ -188,51 +165,6 @@
               //Any additional options can go here
             })
         })     
-
-        //Use the Universal Client Login via our own back end
-        /*
-        $("#login").click(ev => fetch('/manage/connect')
-        .then(res => {
-            console.log(res)
-            return res.text()
-        })
-        .then(url => location.href = url))
-        */
-
-        //Do it with a popup
-        //Hmm this wasn't quite what I thought.
-
-        /*
-        $("#login").click(ev => {
-            webAuth = new auth0.WebAuth({
-                domain:       ISSUER_BASE_URL,
-                clientID:     CLIENTID
-            })
-            webAuth.popup.authorize({
-                "audience":AUDIENCE,
-                "scope":"read:users update:users profile openid offline_access",
-                "redirectUri": DUNBAR_REDIRECT,
-                "responseType" : "token",
-                "clientId" : CLIENTID,
-                "state" : "dunbar123",
-                "autoClose" : true
-              //Any additional options can go here
-            }, function(err, authResult) {
-                webAuth.client.userInfo(authResult.accessToken, function(err, u) {
-                    console.log("I know the user trying to log in now.")
-                    console.log(u)
-                    let agentURI = u["http://store.rerum.io/agent"]
-                    agent = agentURI
-                    token = authResult.accessToken
-                    user = u
-                    sessionStorage.setItem('Agent-URI', agentURI)
-                    sessionStorage.setItem('Dunbar-Token', authResult.accessToken)
-                    sessionStorage.setItem('Dunbar-User', u)
-                })
-            })
-            webAuth.popup.callback()
-        })
-        */
 
     </script>
 </body>

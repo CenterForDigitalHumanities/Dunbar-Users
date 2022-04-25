@@ -72,25 +72,78 @@
         </p>
     </div>
     <div class='panel panel-info' name="block">
-        <div class="panel-heading"> <span class="panel-title">Admin Login</span> </div>
-        <div class="panel-body">
-            <p class="handHoldy">
-                Admins can log in below.
-            </p>
-            <div>
-                <span class="status_header"> Dunbar App Agent </span>
-                <kbd class="rerumStatus" id="agentLink">NOT LOGGED</kbd>
-            </div>
+        <div>
+            Logged in as <span id="agentLink">Not Logged In</span>
         </div>
-        <div class="panel-footer">
-            <input class='btn btn-primary btn-large' type="button" id="login"
-                value="Login To Dunbar User Management" />
-        </div>
+        <h4> Dunbar Users List </h4>
+        <ul id="userList">
+            <li>
+                <span class="username">bhaberbe</span>
+                <input class="small" type="button" value="Action 1"/>
+                <input class="small" type="button" value="Action 2"/>
+                <input class="small" type="button" value="Action 3"/>
+            </li>
+            <li>
+                <span class="username">cubap</span>
+                <input class="small" type="button" value="Action 1"/>
+                <input class="small" type="button" value="Action 2"/>
+                <input class="small" type="button" value="Action 3"/>
+            </li>
+            <li>
+                <span class="username">dunbarp</span>
+                <input class="small" type="button" value="Action 1"/>
+                <input class="small" type="button" value="Action 2"/>
+                <input class="small" type="button" value="Action 3"/>
+            </li>
+            <li>
+                <span class="username">federkob</span>
+                <input class="small" type="button" value="Action 1"/>
+                <input class="small" type="button" value="Action 2"/>
+                <input class="small" type="button" value="Action 3"/>
+            </li>
+            <li>
+                <span class="username">orielyr</span>
+                <input class="small" type="button" value="Action 1"/>
+                <input class="small" type="button" value="Action 2"/>
+                <input class="small" type="button" value="Action 3"/>
+            </li>
+            <li>
+                <span class="username">perrond</span>
+                <input class="small" type="button" value="Action 1"/>
+                <input class="small" type="button" value="Action 2"/>
+                <input class="small" type="button" value="Action 3"/>
+            </li>
+            <li>
+                <span class="username">tarasenkov</span>
+                <input class="small" type="button" value="Action 1"/>
+                <input class="small" type="button" value="Action 2"/>
+                <input class="small" type="button" value="Action 3"/>
+            </li>
+            <li>
+                <span class="username">buchnevichp</span>
+                <input class="small" type="button" value="Action 1"/>
+                <input class="small" type="button" value="Action 2"/>
+                <input class="small" type="button" value="Action 3"/>
+            </li>
+            <li>
+                <span class="username">faulkj</span>
+                <input class="small" type="button" value="Action 1"/>
+                <input class="small" type="button" value="Action 2"/>
+                <input class="small" type="button" value="Action 3"/>
+            </li>
+            <li>
+                <span class="username">bhaberbe</span>
+                <input class="small" type="button" value="Action 1"/>
+                <input class="small" type="button" value="Action 2"/>
+                <input class="small" type="button" value="Action 3"/>
+            </li>
+        </ul>
     </div>
     <script src="https://cdn.auth0.com/js/auth0/9.19.0/auth0.min.js"></script>
     <script type="text/javascript" src="./script/heart.js"></script>
     <script type="text/javascript">
-const AUDIENCE = "https://cubap.auth0.com/api/v2/"
+
+        const AUDIENCE = "https://cubap.auth0.com/api/v2/"
         const ISSUER_BASE_URL = "cubap.auth0.com"
         const CLIENTID = "z1DuwzGPYKmF7POW9LiAipO5MvKSDERM"
         const DUNBAR_REDIRECT = "http://localhost:3000/manage.html"
@@ -123,12 +176,22 @@ const AUDIENCE = "https://cubap.auth0.com/api/v2/"
         //You can trust the token.  However, it may have expired.
         if(token){
             //A token was in sessionStorage, so there was a login during this window session.
-            manager = new auth0.Management({
-              "domain": DOMAIN,
-              "token": token
+            let authenticator = new auth0.Authentication({
+                "domain":     DOMAIN,
+                "clientID":   CLIENTID,
+                "audience":   AUDIENCE,
+                "scope":"create:users read:users read:user_idp_tokens update:users delete:users read:roles create:roles update:roles delete:roles profile openid offline_access "
             })
+
+            let webAuth = new auth0.WebAuth({
+                "domain":     DOMAIN,
+                "clientID":   CLIENTID,
+                "audience":   AUDIENCE,
+                "scope": "create:users read:users read:user_idp_tokens update:users delete:users read:roles create:roles update:roles delete:roles profile openid offline_access"
+            })
+
             //An access token is stored. Let's use it to get THIS USER's info.  If it fails, the user needs to login again.
-            manager.getUser(user.sub, function(err, u){
+            authenticator.userInfo(token, async function(err, u){
                 if(err){
                     console.error(err)
                     sessionStorage.removeItem('Agent-URI')
@@ -138,38 +201,40 @@ const AUDIENCE = "https://cubap.auth0.com/api/v2/"
                     alert("You logged out or your session expired.  Try logging in again.")
                 }
                 else{
-                    console.log("I know the user now.")
-                    console.log(u)
-                    let a = u["http://store.rerum.io/agent"]
-                    agentLink.innerHTML = a
-                    sessionStorage.setItem('Agent-URI', a)
-                    sessionStorage.setItem('Dunbar-User', u)
-                    alert(`Hello ${a}!`)    
+                    //If this user is an admin, get them a management token
+                    if(isAdmin(u)){
+                        token = await getManagementToken()
+                        sessionStorage.setItem('Dunbar-Token', token)
+                        //sessionStorage.setItem('Dunbar-Management-Token', token)
+                        //TODO start a heartbeat that refreshes the token?  Expires every 7200 seconds.
+                        //startHeartbeat(webAuth)
+                        userList.innerHTML = ""
+                        let a = u["http://store.rerum.io/agent"]
+                        agentLink.innerHTML = a
+                        sessionStorage.setItem('Agent-URI', a)
+                        sessionStorage.setItem('Dunbar-User', JSON.stringify(u))
+                        let user_arr = await getAllUsers()
+                        for(u of user_arr){
+                            //Add them to the <ul> with the buttons available to do actions on them.
+                            let elem = `<li><span class="username">${u.username}</span>`
+                            let buttons = `
+                                <input class="small" type="button" value="Action 1"/>
+                                <input class="small" type="button" value="Action 2"/>
+                                <input class="small" type="button" value="Action 3"/>
+                            `
+                            elem += buttons + `</li>`
+                            userList.innerHTML += elem
+                        }       
+                    }
+                    else{
+                        sessionStorage.removeItem('Agent-URI')
+                        sessionStorage.removeItem('Dunbar-Token')
+                        sessionStorage.removeItem('Dunbar-User')
+                        alert("You do not have proper permissions to manage the Dunbar Apps' Users")
+                    }
+                    
                 }
             })
-
-            //Get user using our back end?
-            /*
-            fetch('/client/dunbar-user?access_token='+token)
-            .then(res => res.json())
-            .then(u => {
-                console.log("I know the user now.")
-                console.log(u)
-                let a = u["http://store.rerum.io/agent"]
-                agentLink.innerHTML = a
-                sessionStorage.setItem('Agent-URI', a)
-                sessionStorage.setItem('Dunbar-User', u)
-                alert(`Hello ${a}!`)
-            })
-            .catch(err =>{
-                console.error(err)
-                sessionStorage.removeItem('Agent-URI')
-                sessionStorage.removeItem('Dunbar-Token')
-                sessionStorage.removeItem('Dunbar-User')
-                agentLink.innerHTML = "Please login again.  Your session expired."
-                alert("You logged out or your session expired.  Try logging in again.")
-            })    
-            */ 
         }
         else{
             //They need to log in!
@@ -188,6 +253,39 @@ const AUDIENCE = "https://cubap.auth0.com/api/v2/"
                 if (pair[0] == variable) { return pair[1] }
             }
             return false
+        }
+
+        async function getAllUsers(){
+            let users = await fetch("https://cubap.auth0.com/api/v2/users", {
+                method: 'GET', 
+                cache: 'default',
+                headers: {
+                  'Authorization': `Bearer ${token}`,
+                  'Content-Type' : "application/json; charset=utf-8"
+                }
+            })
+            .then(resp => resp.json())
+            .catch(err => {
+                console.err(err)
+                return []
+            })
+            console.log("I found "+users.length+" users!")
+            return users
+        }
+
+        async function getManagementToken(){
+            let m_token = await fetch("/manage/getManagementToken")
+            .then(resp => resp.text())
+            .catch(err => {
+                console.log("Error getting management token")
+                console.log(err)
+                return ""
+            })
+            return m_token
+        }
+
+        function isAdmin(user){
+            return true
         }
 
     </script>

@@ -4,43 +4,31 @@
  *  @author Bryan Haberberger
  */  
 let beat = false
-function startHeartbeat(){
+
+function startHeartbeat(webAuth){
   //Auth0 Heartbeat that keeps the access token fresh.
     beat = setInterval(async function(){
       console.log("beat...")
       if(sessionStorage.getItem("Dunbar-Token")){
         console.log("token")
-        //You are registered/logged in but you access token has expired b/c it has a short life.  Silently refresh it if possible.
-        try{
-          let resp = await fetch("/manage/revalidate").then(res=>res.json()).catch(err=>{return err})
-          resp = JSON.parse(resp)
-          let t = resp.access_token ?? ""
-          if(t){
-            //This user has continued their session, we we got a new token and can store it
-            console.log("Set token in session storage")
-            sessionStorage.setItem("Dunbar-Token", t)  
-          }
-          else{
-            //The user is logged out or did not continue their session, and so needs to log in again.
-            //console.log("No access token in start heartbeat")
+        webAuth.checkSession({
+          "audience": 'https://cubap.auth0.com/api/v2/',
+          "scope":"create:users read:users read:user_idp_tokens update:users delete:users read:roles create:roles update:roles delete:roles profile openid offline_access",
+          "responseType" : "token",
+        }, function (err, authResult) {
+          // err if automatic parseHash fails
+          if(err){
+            console.log("Check Session error")
+            console.error(e)
             sessionStorage.removeItem("Dunbar-Token")
             sessionStorage.removeItem("Agent-URI") 
             sessionStorage.removeItem("Dunbar-User")
-            console.log("Could not authorize silently.  Please login again.")
             stopHeartbeat()
-            console.error(resp)
-            //document.location.href = "login.html"
           }
-        }
-        catch (e) {
-          //The authorize endpoint errored out and we could not validate you.  Please login again.
-          console.log("got to authorize error")
-          console.error(e)
-          sessionStorage.removeItem("Dunbar-Token")
-          sessionStorage.removeItem("Agent-URI")
-          sessionStorage.removeItem("Dunbar-User")
-          stopHeartbeat()
-        }
+          else{
+            sessionStorage.setItem("Dunbar-Token", authResult.access_token)
+          }
+        })
       }
       else{
         console.log("login plz")

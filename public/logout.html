@@ -17,25 +17,29 @@
         This page will log you out of DLA.
         <a target="_blank" href="/login.html">Login here</a>.
     </p>
+    <script src="https://cdn.auth0.com/js/auth0/9.19.0/auth0.min.js"></script>
+    <script type="text/javascript" src="./script/heart.js"></script>
     <script type="text/javascript">
-        //Logout just by coming here, for now.  You will be redirect to login.
-        //Get rid of the session info from sessionStorage and localStorage and cookies
+        stopHeartbeat()
+        const CLIENTID = "z1DuwzGPYKmF7POW9LiAipO5MvKSDERM"
+        const redirect = "http://localhost:3000/login.html"
         sessionStorage.removeItem('Agent-URI')
         sessionStorage.removeItem('Dunbar-Token')
         localStorage.removeItem('Agent-URI')
         localStorage.removeItem('Dunbar-Token')
         document.cookie = "Agent-URI=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;"
         document.cookie = "Dunbar-Token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;"
-        fetch('/client/disconnect')
-        .then(res => res.text())
-        .then(url => {
-            document.location.href = "login.html"
+
+        webAuth = new auth0.WebAuth({
+            domain:       DOMAIN,
+            clientID:     CLIENTID
         })
-        .catch(err =>{
-            //Gosh dang, whatever, they are removed from sessionStorage and will have to login again.
-            document.location.href = "login.html"
-        }) 
-        
+
+        webAuth.logout({
+            returnTo: redirect,
+            client_id: CLIENTID
+        })
+                
     </script>
 </body>
 
