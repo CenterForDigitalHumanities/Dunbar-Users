@@ -229,10 +229,11 @@
                         }       
                     }
                     else{
+                        //I'ma make you login again.  Consider yourself punished.
                         sessionStorage.removeItem('Agent-URI')
                         sessionStorage.removeItem('Dunbar-Token')
                         sessionStorage.removeItem('Dunbar-User')
-                        alert("You do not have proper permissions to manage the Dunbar Apps' Users")
+                        alert("You do not have proper permissions to manage the Dunbar Apps' Users.")
                     }
                     
                 }
@@ -290,7 +291,8 @@
         }
 
         function isAdmin(user){
-            return true
+            let roles = user["http://dunbar.rerum.io/user_roles"].roles ?? []
+            return roles.includes("dunbar_user_admin")
         }
 
     </script>
