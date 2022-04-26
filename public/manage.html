@@ -202,6 +202,8 @@
                 }
                 else{
                     //If this user is an admin, get them a management token
+                    //We need to add the roles using rules, much like we do for the agent info.
+                    // There is an isAuthenticated checker
                     if(isAdmin(u)){
                         token = await getManagementToken()
                         sessionStorage.setItem('Dunbar-Token', token)

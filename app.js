@@ -64,7 +64,7 @@ app.use(express.static(path.join(__dirname, 'public')))
 
 app.use('/', indexRouter)
 
-app.use('/manage', managementRouter)
+app.use('/dunbar-users/manage', managementRouter)
 
 //catch 404 because of an invalid site path
 app.use(function(req, res, next) {
