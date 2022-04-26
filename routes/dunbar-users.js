@@ -1,6 +1,8 @@
-var express = require('express')
-var path = require('path')
-var router = express.Router()
+#!/usr/bin/env node
+
+const express = require('express')
+const path = require('path')
+const router = express.Router()
 const managementRouter = require('./manage.js')
 // public also available at `/dunbar-users` now
 router.use(express.static(path.join(__dirname, '../public')))

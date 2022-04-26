@@ -1,13 +1,14 @@
 #!/usr/bin/env node
-var createError = require('http-errors')
-var express = require('express')
-var path = require('path')
-var cookieParser = require('cookie-parser')
-var dotenv = require('dotenv')
-var dotenvExpand = require('dotenv-expand')
-var storedEnv = dotenv.config()
+
+const createError = require('http-errors')
+const express = require('express')
+const path = require('path')
+const cookieParser = require('cookie-parser')
+const dotenv = require('dotenv')
+const dotenvExpand = require('dotenv-expand')
+const storedEnv = dotenv.config()
 dotenvExpand.expand(storedEnv)
-var logger = require('morgan')
+const logger = require('morgan')
 const cors = require('cors')
 const got = require('got')
 

@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 const ManagementClient = require('auth0').ManagementClient
 const express = require('express')
 const router = express.Router()
