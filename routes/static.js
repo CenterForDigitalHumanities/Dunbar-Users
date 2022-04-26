@@ -2,7 +2,7 @@
 
 /**
  * This module is used to define the routes of static resources available in `/public`
- * but also under `/v1` paths.
+ * but also under `/dunbar-users` paths.
  * 
  * @author cubap 
  */
@@ -10,7 +10,7 @@ const express = require('express')
 const router = express.Router()
 const path = require('path')
 
-// public also available at `/v1`
+// public also available at `/dunbar-users`
 router.use(express.static(path.join(__dirname, '../public')))
 
 // Set default API response

@@ -216,7 +216,7 @@
                         sessionStorage.setItem('Agent-URI', a)
                         sessionStorage.setItem('Dunbar-User', JSON.stringify(u))
                         let user_arr = await getAllUsers()
-                        for(u of user_arr){
+                        for(let u of user_arr){
                             //Add them to the <ul> with the buttons available to do actions on them.
                             let elem = `<li><span class="username">${u.username}</span>`
                             let buttons = `
@@ -261,7 +261,7 @@
             // ooo we need to add a query to this that filters for Dunbar Apps users only...right now all users are returned (even the bot)
             // https://auth0.com/docs/manage-users/user-search/user-search-query-syntax
             // We can search by app_metadata, user_metadata and profile info
-            let users = await fetch('https://cubap.auth0.com/api/v2/users?q=app_metadata.app:"Dunbar"', {
+            let users = await fetch('https://cubap.auth0.com/api/v2/users?q=app_metadata.app:"dla"', {
                 method: 'GET', 
                 cache: 'default',
                 headers: {
@@ -279,7 +279,7 @@
         }
 
         async function getManagementToken(){
-            let m_token = await fetch("/manage/getManagementToken")
+            let m_token = await fetch("/dunbar-users/manage/getManagementToken")
             .then(resp => resp.text())
             .catch(err => {
                 console.log("Error getting management token")

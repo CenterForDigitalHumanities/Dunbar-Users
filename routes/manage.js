@@ -5,11 +5,12 @@ const got = require('got')
 const auth = require('../auth')
 
 //Behind the scenes the Client Credentials Grant is used to obtain the access_token and is by default cached for the duration of the returned expires_in value
+//There are too many scopes.  Just wanted them listed so you know what to work with.  Use them all for now, see what happens. 
 let auth0 = new ManagementClient({
   domain: process.env.DOMAIN,
   clientId: process.env.CLIENTID,
   clientSecret: process.env.CLIENT_SECRET,
-  scope:"create:users read:users read:user_idp_tokens update:users delete:users read:roles create:roles update:roles delete:roles",
+  scope: "create:users read:users read:user_idp_tokens update:users delete:users read:roles create:roles update:roles delete:roles"
 })
 
 router.get('/getManagementToken', async function(req,res,next){
