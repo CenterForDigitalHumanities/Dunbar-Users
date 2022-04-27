@@ -1,42 +1,68 @@
 #!/usr/bin/env node
 
 const ManagementClient = require('auth0').ManagementClient
+const AuthenticationClient = require('auth0').AuthenticationClient
 const express = require('express')
 const router = express.Router()
 const got = require('got')
 const auth = require('../auth')
 
 //Behind the scenes the Client Credentials Grant is used to obtain the access_token and is by default cached for the duration of the returned expires_in value
-//There are too many scopes.  Just wanted them listed so you know what to work with.  Use them all for now, see what happens. 
-let auth0 = new ManagementClient({
+let manager = new ManagementClient({
   domain: process.env.DOMAIN,
   clientId: process.env.CLIENTID,
   clientSecret: process.env.CLIENT_SECRET,
   scope: "create:users read:users read:user_idp_tokens update:users delete:users read:roles create:roles update:roles delete:roles"
 })
 
+//Behind the scenes the Client Credentials Grant is used to obtain the access_token and is by default cached for the duration of the returned expires_in value
+let authenticator = new AuthenticationClient({
+  domain: process.env.DOMAIN,
+  clientId: process.env.CLIENTID
+})
+
+function isAdmin(user){
+  let roles = {roles:[]}
+  if(user[process.env.DUNBAR_ROLES_CLAIM]){
+    roles = user[process.env.DUNBAR_ROLES_CLAIM].roles ?? {roles:[]}
+  }
+  return roles.includes(process.env.DUNBAR_ADMIN_ROLE)
+}
+
 /**
  * We trust this as our Auth0 server, because it's ours.
  * Ask our Dunbar Auth0 for an access token with user management scope.
  */ 
 router.get('/getManagementToken', async function(req,res,next){
-  //let token = await auth0.getAccessToken()
-  //res.status(200).send(token)
-  auth0.getAccessToken()
-  .then(tok => {
-    console.log("tok is")
-    console.log(tok)
-    res.status(200).send(tok)
+  let token = req.header("Authorization") ?? ""
+  token = token.replace("Bearer ", "")
+  authenticator.getProfile(token)
+  .then(user =>{
+      if(isAdmin(user)){
+        manager.getAccessToken()
+          .then(tok => {
+            console.log("tok is")
+            console.log(tok)
+            res.status(200).send(tok)
+          })
+          .catch(err => {
+            res.status(500).send(err)    
+          })  
+      }
+      else{
+        res.status(500).send("You are not an admin")  
+      }
   })
   .catch(err => {
-    res.status(500).send(err)    
+    res.status(500).send(err)
   })
-  
 })
 
 /**
  * We trust this as our Auth0 server, because it's ours.
  * Ask our Dunbar Auth0 for a fresh access token with user management scope.
+ * //FIXME!  The general access token or user should come in with this request.  Only fire if they are admin!
+  manager.getAccessToken()
  */ 
 router.get('/refreshManagementToken', async function(req,res,next){
   res.status(200).send("Nothing Yet")
@@ -47,11 +73,13 @@ router.get('/refreshManagementToken', async function(req,res,next){
  * Tell our Dunbar Auth0 to assign the given user id to the Dunbar Public role.
  * This limits access token scope.
  * Other roles are removed.
+ * //FIXME!  The general access token or user should come in with this request.  Only fire if they are admin!
+  manager.getAccessToken()
  */ 
 router.get('/assignPublicRole/:_id', async function(req,res,next){
     const params =  { "id" : req.params["_id"]}
     const data = { "roles" : [process.env.PUBLIC_ROLE_ID]}
-    auth0.users.assignRolesToUser(params, data)
+    manager.users.assignRolesToUser(params, data)
     .then(resp => {
       console.log("resp is")
       console.log(resp)
@@ -67,7 +95,7 @@ router.get('/assignPublicRole/:_id', async function(req,res,next){
     })
 
     /*
-     auth0.users.assignRolesToUser(params, data, function (err, user) {
+     manager.users.assignRolesToUser(params, data, function (err, user) {
       if (err) {
           // Handle error.
           console.error(err)
@@ -89,13 +117,3 @@ function getURLHash(variable, url) {
 }
 
 module.exports = router
-
-exports.onExecutePostLogin = async (event, api) => {
-    const authorization = event.authorization ?? {roles:[]}
-    console.log("roles in action is")
-    console.log(authorization)
-    if(authorization.hasOwnProperty("roles") && authorization.roles.length>0){
-      api.accessToken.setCustomClaim('http://dunbar.rerum.io/user_roles', authorization);  
-      api.idToken.setCustomClaim('http://dunbar.rerum.io/user_roles', authorization);  
-    }
-};

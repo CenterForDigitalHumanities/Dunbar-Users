@@ -280,7 +280,13 @@
         }
 
         async function getManagementToken(){
-            let m_token = await fetch("/dunbar-users/manage/getManagementToken")
+            let m_token = await fetch("/dunbar-users/manage/getManagementToken", {
+                "method" : "GET",
+                "cache" : "no-store",
+                "headers" :{
+                    "Authorization" : `Bearer ${sessionStorage.getItem("Dunbar-Token")}`
+                }
+            })
             .then(resp => resp.text())
             .catch(err => {
                 console.log("Error getting management token")
