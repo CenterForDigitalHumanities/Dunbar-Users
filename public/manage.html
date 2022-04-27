@@ -290,6 +290,23 @@
             return m_token
         }
 
+        async function assignAsPublic(userID){
+            fetch(`/dunbar-users/manage/assignPublicRole/${userID}`)
+            .then(resp => {
+                if(resp.ok){
+                    alert("Role was assigned")
+                }
+                else{
+                    console.error(resp)
+                    alert("Role failed to assign")
+                }
+            })
+            .catch(err => {
+                console.error(err)
+                alert("Error assigning role")
+            })  
+        }
+
         function isAdmin(user){
             let roles = user["http://dunbar.rerum.io/user_roles"].roles ?? []
             return roles.includes("dunbar_user_admin")
