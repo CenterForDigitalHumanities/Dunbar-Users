@@ -93,7 +93,7 @@
             </p>
             <div>
                 <span class="status_header"> Dunbar App Agent </span>
-                <kbd class="rerumStatus" id="agentLink">NOT LOGGED</kbd>
+                <kbd class="rerumStatus" id="agentLink">NOT LOGGED IN</kbd>
             </div>
         </div>
         <div class="panel-footer">
@@ -156,6 +156,7 @@
                 "scope":"create:users read:users read:user_idp_tokens update:users delete:users read:roles create:roles update:roles delete:roles profile openid offline_access",
             })
             webAuth.authorize({
+                "authParamsMap": {'app': 'dla'},
                 "audience":AUDIENCE,
                 "scope":"create:users read:users read:user_idp_tokens update:users delete:users read:roles create:roles update:roles delete:roles profile openid offline_access",
                 "redirectUri": DUNBAR_REDIRECT,

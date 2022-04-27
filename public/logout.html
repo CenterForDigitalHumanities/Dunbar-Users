@@ -25,11 +25,14 @@
         const CLIENTID = "z1DuwzGPYKmF7POW9LiAipO5MvKSDERM"
         const redirect = "http://dunbar-users.herokuapp.com/dunbar-users/login.html"
         sessionStorage.removeItem('Agent-URI')
-        sessionStorage.removeItem('Dunbar-Token')
+        sessionStorage.removeItem('Dunbar-Management-Token')
+        sessionStorage.removeItem('Dunbar-Login-Token')
         localStorage.removeItem('Agent-URI')
-        localStorage.removeItem('Dunbar-Token')
+        localStorage.removeItem('Dunbar-Management-Token')
+        localStorage.removeItem('Dunbar-Login-Token')
         document.cookie = "Agent-URI=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;"
-        document.cookie = "Dunbar-Token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;"
+        document.cookie = "Dunbar-Login-Token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;"
+        document.cookie = "Dunbar-Management-Token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;"
 
         webAuth = new auth0.WebAuth({
             domain:       DOMAIN,

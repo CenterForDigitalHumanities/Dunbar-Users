@@ -138,6 +138,10 @@
                 <input class="small" type="button" value="Action 3"/>
             </li>
         </ul>
+        <div id="adminExtras"> 
+            <p>Want to register a new user?  Head to the registration page to fille out their information!</p>
+            <input type="button" value="Register New User" onclick="registerNewUser()" />
+        </div>
     </div>
     <script src="https://cdn.auth0.com/js/auth0/9.19.0/auth0.min.js"></script>
     <script type="text/javascript" src="./script/heart.js"></script>
@@ -153,26 +157,28 @@
         let webAuth = null
         let manager = null
 
-        //Keep these in session when appropriate, to help avoid as many async calls as possible.
-
         //This is an Auth0 Bearer, a management access token
-        let token = sessionStorage.getItem("Dunbar-Token")
+        let token = sessionStorage.getItem("Dunbar-Login-Token")
         //This is a RERUM v1 Agent
         let agent = sessionStorage.getItem("Agent-URI")
         //This is an Auth0 User Profile
-        //TODO how do i know if this user is an admin?
         let user = sessionStorage.getItem("Dunbar-User")
         
+        //If this is in the address bar, then it means we used Universal Login to add a new user
+        //We don't want to be seen as the new user.  We want this page to remember who we were as the admin.
+        let check = getURLHash("state")
 
-        //If this is in the address bar, then it means we are resetting the user and token in storage.  Don't trust the ones you have.
-        if (myURL.indexOf("access_token=") > -1) {
-            //Auth0 Login Widget was successful and it redirect here with the access token in the URL.
-            //Put the token in session storage and refresh the page.  We don't want it in the address bar.
-            token = getURLHash("access_token")
-            sessionStorage.setItem('Dunbar-Token', token)
-            //document.location.href="login.html"
+        if(myURL.indexOf("access_token=") > -1){
+            if(getURLHash("state") === "dunbar123"){
+                token = getURLHash("access_token")
+                sessionStorage.setItem('Dunbar-Login-Token', token)
+            }    
+            else if(getURLHash("state") === "added-new-user"){
+                token = sessionStorage.getItem('Dunbar-Login-Token', token)
+            }
+            history.replaceState(null, null, ' ')
         }
-
+        
         //You can trust the token.  However, it may have expired.
         if(token){
             //A token was in sessionStorage, so there was a login during this window session.
@@ -195,7 +201,8 @@
                 if(err){
                     console.error(err)
                     sessionStorage.removeItem('Agent-URI')
-                    sessionStorage.removeItem('Dunbar-Token')
+                    sessionStorage.removeItem('Dunbar-Login-Token')
+                    sessionStorage.removeItem('Dunbar-Management-Token')
                     sessionStorage.removeItem('Dunbar-User')
                     agentLink.innerHTML = "Please login again.  Your session expired."
                     alert("You logged out or your session expired.  Try logging in again.")
@@ -203,11 +210,10 @@
                 else{
                     //If this user is an admin, get them a management token
                     //We need to add the roles using rules, much like we do for the agent info.
-                    // There is an isAuthenticated checker
+                    //There exists an isAuthenticated checker
                     if(isAdmin(u)){
                         token = await getManagementToken()
-                        sessionStorage.setItem('Dunbar-Token', token)
-                        //sessionStorage.setItem('Dunbar-Management-Token', token)
+                        sessionStorage.setItem('Dunbar-Management-Token', token)
                         //TODO start a heartbeat that refreshes the token?  Expires every 7200 seconds.
                         //startHeartbeat(webAuth)
                         userList.innerHTML = ""
@@ -231,13 +237,14 @@
                     else{
                         //I'ma make you login again.  Consider yourself punished.
                         sessionStorage.removeItem('Agent-URI')
-                        sessionStorage.removeItem('Dunbar-Token')
+                        sessionStorage.removeItem('Dunbar-Login-Token')
+                        sessionStorage.removeItem('Dunbar-Management-Token')
                         sessionStorage.removeItem('Dunbar-User')
                         alert("You do not have proper permissions to manage the Dunbar Apps' Users.")
                     }
-                    
                 }
             })
+            history.replaceState(null, null, ' ');
         }
         else{
             //They need to log in!
@@ -259,14 +266,11 @@
         }
 
         async function getAllUsers(){
-            // ooo we need to add a query to this that filters for Dunbar Apps users only...right now all users are returned (even the bot)
-            // https://auth0.com/docs/manage-users/user-search/user-search-query-syntax
-            // We can search by app_metadata, user_metadata and profile info
             let users = await fetch('https://cubap.auth0.com/api/v2/users?q=app_metadata.app:"dla"', {
                 method: 'GET', 
                 cache: 'default',
                 headers: {
-                  'Authorization': `Bearer ${token}`,
+                  'Authorization': `Bearer ${sessionStorage.getItem("Dunbar-Management-Token")}`,
                   'Content-Type' : "application/json; charset=utf-8"
                 }
             })
@@ -284,7 +288,7 @@
                 "method" : "GET",
                 "cache" : "no-store",
                 "headers" :{
-                    "Authorization" : `Bearer ${sessionStorage.getItem("Dunbar-Token")}`
+                    "Authorization" : `Bearer ${sessionStorage.getItem("Dunbar-Login-Token")}`
                 }
             })
             .then(resp => resp.text())
@@ -316,6 +320,30 @@
         function isAdmin(user){
             let roles = user["http://dunbar.rerum.io/user_roles"].roles ?? []
             return roles.includes("dunbar_user_admin")
+        }
+
+        function registerNewUser(){
+            webAuth = new auth0.WebAuth({
+                "domain":       DOMAIN,
+                "clientID":     CLIENTID,
+                "audience":   AUDIENCE,
+                "scope":"profile openid offline_access",
+            })
+            //The goal here will be to send this current user off to register another user.
+            //Once that other user is registered, they should come back to manage.html as themselves instead of the new user
+            //They are themselves based on the token in sessionStorage.getItem("Dunbar-Login-Token")
+            //The new user is registered based on the #access_token in URL
+            //We need something additional in that URL to let us know not to overrule the token in sessionStorage.
+            webAuth.authorize({
+                "authParamsMap": {'app': 'dla', 'no-redirect' : true},
+                "audience":AUDIENCE,
+                "scope":"profile openid offline_access",
+                "redirectUri": DUNBAR_REDIRECT,
+                "responseType" : "token",
+                "clientId" : CLIENTID,
+                "state" : "added-new-user"
+              //Any additional options can go here
+            })
         }
 
     </script>
