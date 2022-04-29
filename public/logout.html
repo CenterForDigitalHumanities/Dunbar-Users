@@ -20,19 +20,17 @@
     <script src="https://cdn.auth0.com/js/auth0/9.19.0/auth0.min.js"></script>
     <script type="text/javascript" src="./script/heart.js"></script>
     <script type="text/javascript">
-        stopHeartbeat()
         const DOMAIN = "cubap.auth0.com"
         const CLIENTID = "z1DuwzGPYKmF7POW9LiAipO5MvKSDERM"
-        const redirect = "http://dunbar-users.herokuapp.com/dunbar-users/login.html"
+        const redirect = "https://dunbar-users.herokuapp.com/dunbar-users/login.html"
         sessionStorage.removeItem('Agent-URI')
-        sessionStorage.removeItem('Dunbar-Management-Token')
         sessionStorage.removeItem('Dunbar-Login-Token')
         localStorage.removeItem('Agent-URI')
-        localStorage.removeItem('Dunbar-Management-Token')
         localStorage.removeItem('Dunbar-Login-Token')
         document.cookie = "Agent-URI=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;"
         document.cookie = "Dunbar-Login-Token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;"
-        document.cookie = "Dunbar-Management-Token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;"
+
+        clearInterval(login_beat)
 
         webAuth = new auth0.WebAuth({
             domain:       DOMAIN,

@@ -102,13 +102,11 @@
         </div>
     </div>
     <script src="https://cdn.auth0.com/js/auth0/9.19.0/auth0.min.js"></script>
-    <script type="text/javascript" src="./script/heart.js"></script>
     <script type="text/javascript">
 
         const AUDIENCE = "https://cubap.auth0.com/api/v2/"
-        const ISSUER_BASE_URL = "cubap.auth0.com"
         const CLIENTID = "z1DuwzGPYKmF7POW9LiAipO5MvKSDERM"
-        const DUNBAR_REDIRECT = "http://dunbar-users.herokuapp.com/dunbar-users/manage.html"
+        const DUNBAR_REDIRECT = "https://dunbar-users.herokuapp.com/dunbar-users/manage.html"
         const DOMAIN = "cubap.auth0.com"
 
         let webAuth = null
@@ -117,18 +115,15 @@
         //Keep these in session when appropriate, to help avoid as many async calls as possible.
 
         //This is an Auth0 Bearer, a management access token
-        let token = sessionStorage.getItem("Dunbar-Token")
+        let token = sessionStorage.getItem("Dunbar-Login-Token")
         //This is a RERUM v1 Agent
         let agent = sessionStorage.getItem("Agent-URI")
-        //This is an Auth0 User Profile
-        //TODO how do i know if this user is an admin?
-        let user = sessionStorage.getItem("Dunbar-User") ? JSON.parse(sessionStorage.getItem("Dunbar-User")) : {}
 
         if(token){
             //A token was in sessionStorage, so there was a login during this window session.
             //This manager cannot be used to access OTHER USERS' info
             let authenticator = new auth0.Authentication({
-                domain:       ISSUER_BASE_URL,
+                domain:       DOMAIN,
                 clientID:     CLIENTID
             })
             //An access token is stored. Let's use it to get THIS USER's info.  If it fails, the user needs to login again.
@@ -138,7 +133,6 @@
                 }
                 else{
                     sessionStorage.setItem('Agent-URI', u["http://store.rerum.io/agent"])
-                    sessionStorage.setItem('Dunbar-User', JSON.stringify(u))
                     document.location.href="manage.html"
                 }
             })
@@ -153,17 +147,17 @@
                 "domain":       DOMAIN,
                 "clientID":     CLIENTID,
                 "audience":   AUDIENCE,
-                "scope":"create:users read:users read:user_idp_tokens update:users delete:users read:roles create:roles update:roles delete:roles profile openid offline_access",
+                "scope":"read:roles profile openid offline_access"
             })
             webAuth.authorize({
                 "authParamsMap": {'app': 'dla'},
                 "audience":AUDIENCE,
-                "scope":"create:users read:users read:user_idp_tokens update:users delete:users read:roles create:roles update:roles delete:roles profile openid offline_access",
+                "scope":"read:roles profile openid offline_access",
                 "redirectUri": DUNBAR_REDIRECT,
                 "responseType" : "token",
-                "clientId" : CLIENTID,
-                "state" : "dunbar123"
-              //Any additional options can go here
+                "clientId" : CLIENTID
+                //"state" : "dunbar123"
+                //Any additional options can go here
             })
         })     
 
