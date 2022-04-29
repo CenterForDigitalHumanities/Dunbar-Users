@@ -1,6 +1,7 @@
 //Note that all of this is fresh upon entering the page with a good login token.
 //Instead of a timer, we can refresh these upon page focus/action
 //It depends how often our tokens will die.  At 30 seconds, we should have this.  If it lasts for hours, then we don't need this.
+login_beat = null
 function startHeartbeat(webAuth){
     login_beat = setInterval(async function(){
         if(sessionStorage.getItem("Dunbar-Login-Token")){
@@ -9,7 +10,7 @@ function startHeartbeat(webAuth){
                     console.error(err1)
                     sessionStorage.removeItem('Agent-URI')
                     sessionStorage.removeItem('Dunbar-Login-Token')
-                    clearInterval(login_beat)
+                    stopHeartbeat()
                     agentLink.innerHTML = "Please login again.  Your session expired."
                     alert("You logged out or your session expired.  Try logging in again.")
                 }
@@ -20,7 +21,7 @@ function startHeartbeat(webAuth){
                             console.error(err2)
                             sessionStorage.removeItem('Agent-URI')
                             sessionStorage.removeItem('Dunbar-Login-Token')
-                            clearInterval(login_beat)
+                            stopHeartbeat()
                             agentLink.innerHTML = "Please login again.  checkSession() failure"
                         }
                         else{
@@ -38,5 +39,7 @@ function startHeartbeat(webAuth){
 }
 
 function stopHeartbeat(){
-    clearInterval(login_beat)
+    if(login_beat !== null && login_beat !== undefined){
+        clearInterval(login_beat)
+    }
 }
