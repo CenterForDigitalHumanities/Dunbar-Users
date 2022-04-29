@@ -141,12 +141,12 @@
                 "domain":       DOMAIN,
                 "clientID":     CLIENTID,
                 "audience":   AUDIENCE,
-                "scope":"read:roles profile openid offline_access"
+                "scope":"read:roles update:current_user_metadata name nickname picture email profile openid offline_access"
             })
             webAuth.authorize({
                 "authParamsMap": {'app': 'dla'},
                 "audience":AUDIENCE,
-                "scope":"read:roles profile openid offline_access",
+                "scope":"read:roles update:current_user_metadata name nickname picture email profile openid offline_access",
                 "redirectUri": DUNBAR_REDIRECT,
                 "responseType" : "token",
                 "clientId" : CLIENTID

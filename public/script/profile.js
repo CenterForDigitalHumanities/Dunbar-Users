@@ -10,13 +10,19 @@ const myURL = window.location
 let agent = sessionStorage.getItem("Agent-URI")
 let token = sessionStorage.getItem("Dunbar-Login-Token")
 
+let authenticator = new auth0.Authentication({
+    "domain":     DOMAIN,
+    "clientID":   CLIENTID,
+    "scope":"read:roles update:current_user_metadata name nickname picture email profile openid offline_access"
+})
+
 let webAuth = new auth0.WebAuth({
     "domain":       DOMAIN,
     "clientID":     CLIENTID,
     "audience":   AUDIENCE,
     "responseType" : "token",
     "redirectUri" : DUNBAR_REDIRECT,
-    "scope":"profile openid offline_access",
+    "scope":"read:roles update:current_user_metadata name nickname picture email profile openid offline_access",
 })
 
 //Should only be able to update their own user info, no need to access our auth0 server.  Treat this as just a client.
@@ -44,8 +50,12 @@ if(sessionStorage.getItem("Dunbar-Login-Token")){
             })
             //You have the profile information.  Put the current information into the exposed form.
             let a = u["http://store.rerum.io/agent"]
-            agentLink.innerHTML = a
+            agentLink.innerHTML = u.name
             sessionStorage.setItem('Agent-URI', a)
+            const form = document.getElementById('userForm')
+            form.addEventListener('submit', (e) =>{
+                updateUserInfo(e, u.sub)
+            })
         }
     })
 }
@@ -54,15 +64,49 @@ else{
     alert("You logged out or your session expired.  Try logging in again.")
     window.location="login.html"
 }
+/**
+ * ALLOWED FIELDS
+app_metadata
+blocked
+email
+email_verified
+family_name
+given_name
+name
+nickname
+password
+phone_number
+phone_verified
+picture
+username
+user_metadata
+verify_email
+ */ 
+async function updateUserInfo(event, userid){
+    event.preventDefault()
+    let params = { id: userid }    
+    let info = new FormData(event.target);
+    let data = Object.fromEntries(info.entries())
 
-async function changeUsername(userid, role){
-
+    for(prop in data){
+        if(data[prop] === "" || data[prop] === null || data[prop] === undefined){
+            delete data[prop]
+        }
+    }
+    console.log("data in user info"+userid)
+    console.log(data)
+    
+    manager.patchUserAttributes(userid, data, (err, user) => {
+        if(err){
+            console.error("Update Failed!")
+            console.error(err)
+        }
+        else{
+            console.log("User Updated!")
+            console.log(user)        
+        }
+        
+    })
+    
 }
 
-async function changeEmail(userid, role){
-
-}
-
-async function changePassword(userid, role){
-
-}

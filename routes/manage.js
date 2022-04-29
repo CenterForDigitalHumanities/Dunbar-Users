@@ -112,7 +112,7 @@ router.get('/getManagementToken', async function(req,res,next){
  * This limits access token scope.
  * Other roles are removed.
  */ 
-router.post('/assignPublicRole/:_id', async function(req,res,next){
+router.get('/assignPublicRole/:_id', async function(req,res,next){
   let token = req.header("Authorization") ?? ""
   token = token.replace("Bearer ", "")
   authenticator.getProfile(token)
@@ -154,7 +154,7 @@ router.post('/assignPublicRole/:_id', async function(req,res,next){
  * This limits access token scope.
  * Other roles are removed.
  */ 
-router.post('/assignContributorRole/:_id', async function(req,res,next){
+router.get('/assignContributorRole/:_id', async function(req,res,next){
 let token = req.header("Authorization") ?? ""
   token = token.replace("Bearer ", "")
   authenticator.getProfile(token)
@@ -237,7 +237,7 @@ router.post('/assignAdminRole/:_id', async function(req,res,next){
  * That manager will allow them to update their own profile info, and no one else's.
  * 
  */ 
-router.post('/updateOwnRole', async function(req,res,next){
+router.post('/updateOwnProfileInfo', async function(req,res,next){
   let token = req.header("Authorization") ?? ""
   token = token.replace("Bearer ", "")
   authenticator.getProfile(token)

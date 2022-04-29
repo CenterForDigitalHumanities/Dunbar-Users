@@ -6,11 +6,11 @@ const DUNBAR_USER_ROLES_CLAIM = "http://dunbar.rerum.io/user_roles"
 const DUNBAR_PUBLIC_ROLE = "dunbar_user_public"
 const DUNBAR_CONTRIBUTOR_ROLE = "dunbar_user_contributor"
 const DUNBAR_ADMIN_ROLE = "dunbar_user_admin"
-const myURL = window.location
+const myURL = document.location.href
 let authenticator = new auth0.Authentication({
     "domain":     DOMAIN,
     "clientID":   CLIENTID,
-    "scope":"read:roles profile openid offline_access"
+    "scope":"read:roles update:current_user_metadata name nickname picture email profile openid offline_access"
 })
 let webAuth = new auth0.WebAuth({
     "domain":       DOMAIN,
@@ -18,7 +18,7 @@ let webAuth = new auth0.WebAuth({
     "audience":   AUDIENCE,
     "responseType" : "token",
     "redirectUri" : DUNBAR_REDIRECT,
-    "scope":"profile openid offline_access",
+    "scope":"read:roles update:current_user_metadata name nickname picture email profile openid offline_access",
 })
 let agent = sessionStorage.getItem("Agent-URI")        
 if(myURL.indexOf("access_token=") > -1){
@@ -88,7 +88,7 @@ else{
 async function assignRole(userid, role){
     let url = `/dunbar-users/manage/assign${role}Role/${userid}`
     fetch(url, {
-        method: 'POST', 
+        method: 'GET', 
         cache: 'default',
         headers: {
           'Authorization': `Bearer ${sessionStorage.getItem("Dunbar-Login-Token")}`,
@@ -110,7 +110,7 @@ async function assignRole(userid, role){
  * Auth0 redirects here with a bunch of info in hash variables.
  * This function allows you pull a single variable from the hash
  */  
-function getURLHash(variable, url=window.location) {
+function getURLHash(variable, url=document.location.href) {
     var query = url.substr(url.indexOf("#")+1)
     var vars = query.split("&")
     for (var i = 0; i < vars.length; i++) {
