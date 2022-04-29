@@ -155,36 +155,25 @@ router.post('/assignPublicRole/:_id', async function(req,res,next){
  * Other roles are removed.
  */ 
 router.post('/assignContributorRole/:_id', async function(req,res,next){
-  let token = req.header("Authorization") ?? ""
+let token = req.header("Authorization") ?? ""
   token = token.replace("Bearer ", "")
   authenticator.getProfile(token)
   .then(user =>{
       if(isAdmin(user)){
         let params =  { "id" : process.env.DUNBAR_CONTRIBUTOR_ROLE_ID}
         let data = { "users" : [req.params._id]}
-        //Should this just be assignRolesToUser?  I think either actually does the same thing.
         manager.assignUsersToRole(params, data)
         .then(resp => {
-          if(resp.ok){
-            //unassign from other roles
+            //unassign from other Dunbar roles
             params = {"id" : req.params._id}
             data = { "roles" : [process.env.DUNBAR_PUBLIC_ROLE_ID, process.env.DUNBAR_ADMIN_ROLE_ID]}
             manager.removeRolesFromUser(params, data)
             .then(resp2 =>{
-              if(resp2.ok){
                 res.status(200).send("Contributor role was successfully assinged to the user")
-              }
-              else{
-                res.status(500).send("Internal error assigning role to use")
-              }
             })
             .catch(err => {
               res.status(500).send(err)  
             })  
-          }
-          else{
-            res.status(500).send("Internal error assigning role to user")
-          }
         })
         .catch(err => {
           res.status(500).send(err)  
@@ -216,29 +205,18 @@ router.post('/assignAdminRole/:_id', async function(req,res,next){
       if(isAdmin(user)){
         let params =  { "id" : process.env.DUNBAR_ADMIN_ROLE_ID}
         let data = { "users" : [req.params._id]}
-        //Should this just be assignRolesToUser?  I think either actually does the same thing.
         manager.assignUsersToRole(params, data)
         .then(resp => {
-          if(resp.ok){
-            //unassign from other roles
+            //unassign from other Dunbar roles
             params = {"id" : req.params._id}
-            data = { "roles" : [process.env.DUNBAR_PUBLIC_ROLE_ID, process.env.DUNBAR_CONTRIBUTOR_ROLE_ID]}
+            data = { "roles" : [process.env.DUNBAR_CONTRIBUTOR_ROLE_ID, process.env.DUNBAR_PUBLIC_ROLE_ID]}
             manager.removeRolesFromUser(params, data)
             .then(resp2 =>{
-              if(resp2.ok){
                 res.status(200).send("Admin role was successfully assinged to the user")
-              }
-              else{
-                res.status(500).send("Internal error assigning role to use")
-              }
             })
             .catch(err => {
               res.status(500).send(err)  
             })  
-          }
-          else{
-            res.status(500).send("Internal error assigning role to user")
-          }
         })
         .catch(err => {
           res.status(500).send(err)  
@@ -252,6 +230,40 @@ router.post('/assignAdminRole/:_id', async function(req,res,next){
     res.status(500).send(err)
   })
   */
+})
+
+/**
+ * We need to establish a new management client for this with the users login-token-scope
+ * That manager will allow them to update their own profile info, and no one else's.
+ * 
+ */ 
+router.post('/updateOwnRole', async function(req,res,next){
+  let token = req.header("Authorization") ?? ""
+  token = token.replace("Bearer ", "")
+  authenticator.getProfile(token)
+  .then(user =>{
+    let params =  { "id" : process.env.DUNBAR_CONTRIBUTOR_ROLE_ID}
+    let data = { "users" : [req.params._id]}
+    manager.assignUsersToRole(params, data)
+    .then(resp => {
+        //unassign from other Dunbar roles
+        params = {"id" : req.params._id}
+        data = { "roles" : [process.env.DUNBAR_PUBLIC_ROLE_ID, process.env.DUNBAR_ADMIN_ROLE_ID]}
+        manager.removeRolesFromUser(params, data)
+        .then(resp2 =>{
+            res.status(200).send("Contributor role was successfully assinged to the user")
+        })
+        .catch(err => {
+          res.status(500).send(err)  
+        })  
+    })
+    .catch(err => {
+      res.status(500).send(err)  
+    })
+  })
+  .catch(err => {
+    res.status(500).send(err)
+  })
 })
 
 function getURLHash(variable, url) {
