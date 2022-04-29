@@ -6,7 +6,7 @@ const DUNBAR_USER_ROLES_CLAIM = "http://dunbar.rerum.io/user_roles"
 const DUNBAR_PUBLIC_ROLE = "dunbar_user_public"
 const DUNBAR_CONTRIBUTOR_ROLE = "dunbar_user_contributor"
 const DUNBAR_ADMIN_ROLE = "dunbar_user_admin"
-const myURL = document.location.href
+const myURL = window.location
 let agent = sessionStorage.getItem("Agent-URI")
 let token = sessionStorage.getItem("Dunbar-Login-Token")
 
@@ -52,7 +52,7 @@ if(sessionStorage.getItem("Dunbar-Login-Token")){
 else{
     //They need to log in!
     alert("You logged out or your session expired.  Try logging in again.")
-    document.location.href="login.html"
+    window.location="login.html"
 }
 
 async function changeUsername(userid, role){

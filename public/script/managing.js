@@ -6,7 +6,7 @@ const DUNBAR_USER_ROLES_CLAIM = "http://dunbar.rerum.io/user_roles"
 const DUNBAR_PUBLIC_ROLE = "dunbar_user_public"
 const DUNBAR_CONTRIBUTOR_ROLE = "dunbar_user_contributor"
 const DUNBAR_ADMIN_ROLE = "dunbar_user_admin"
-const myURL = document.location.href
+const myURL = window.location
 let authenticator = new auth0.Authentication({
     "domain":     DOMAIN,
     "clientID":   CLIENTID,
@@ -73,7 +73,7 @@ if(sessionStorage.getItem("Dunbar-Login-Token")){
                 // sessionStorage.removeItem('Dunbar-Login-Token')
                 stopHeartbeat()
                 alert("You do not have proper permissions to manage the Dunbar Apps' Users.  You will be sent to your profile.")
-                document.location.href="profile.html"
+                window.location="profile.html"
             }
         }
     })
@@ -82,7 +82,7 @@ if(sessionStorage.getItem("Dunbar-Login-Token")){
 else{
     //They need to log in!
     alert("You logged out or your session expired.  Try logging in again.")
-    document.location.href="login.html"
+    window.location="login.html"
 }
 
 async function assignRole(userid, role){
@@ -110,7 +110,7 @@ async function assignRole(userid, role){
  * Auth0 redirects here with a bunch of info in hash variables.
  * This function allows you pull a single variable from the hash
  */  
-function getURLHash(variable, url=document.location.href) {
+function getURLHash(variable, url=window.location) {
     var query = url.substr(url.indexOf("#")+1)
     var vars = query.split("&")
     for (var i = 0; i < vars.length; i++) {
