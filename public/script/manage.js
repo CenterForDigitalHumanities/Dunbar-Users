@@ -43,17 +43,18 @@ if(sessionStorage.getItem("Dunbar-Login-Token")){
                 userList.innerHTML = ""
                 userName.innerHTML = u.name ?? u.nickname ?? u.email
                 let user_arr = await getAllUsers()
-                for(let u of user_arr){
+                for(let user of user_arr){
                     //This presumes they will only have one dunbar role here.  Make sure getAllUsers() accounts for that.
                     let role = u[DUNBAR_USER_ROLES_CLAIM].roles[0] ?? "Role Not Assigned"
                     role = role.replace("dunbar_user_", "")
                     role = role.charAt(0).toUpperCase() + role.slice(1)
-                    let elem = `<li user="${u.username}"><span class="info username">${u.username}</span>`
-                    elem += `<span class="info role" userid="${u.user_id}"> : ${role}</span>`
+                    //let elem = `<li user="${u.username}"><span class="info username">${user.username}</span>`
+                    let elem = `<li user="${u.name}"><span class="info username">${user.name}</span>`
+                    elem += `<span class="info role" userid="${user.user_id}"> : ${role}</span>`
                     let buttons = `
                         <div class="actions">
-                            <input class="small" type="button" value="Make Public" onclick="assignRole('${u.user_id}', 'Public')"/>
-                            <input class="small" type="button" value="Make Contributor" onclick="assignRole('${u.user_id}','Contributor')"/>
+                            <input class="small" type="button" value="Make Public" onclick="assignRole('${user.user_id}', 'Public')"/>
+                            <input class="small" type="button" value="Make Contributor" onclick="assignRole('${user.user_id}','Contributor')"/>
                         </div>
                     `
                     if(role !== "Admin"){
@@ -83,6 +84,9 @@ else{
 
 async function assignRole(userid, role){
     let url = `/dunbar-users/manage/assign${role}Role/${userid}`
+    document.querySelectorAll(`.role[userid="${userid}"]`).forEach(elem => {
+        elem.innerHTML = ` : Updating Role...`
+    })
     fetch(url, {
         method: 'GET', 
         cache: 'default',
@@ -94,11 +98,14 @@ async function assignRole(userid, role){
     .then(resp => {
         document.querySelectorAll(`.role[userid="${userid}"]`).forEach(elem => {
             elem.innerHTML = ` : ${role}`
-        });
+        })
     })
     .catch(err => {
         console.error("Role was not assigned")
         console.error(err)
+        document.querySelectorAll(`.role[userid="${userid}"]`).forEach(elem => {
+            elem.innerHTML = ` : Error`
+        })
     })
 }
 
