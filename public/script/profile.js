@@ -45,8 +45,8 @@ if(sessionStorage.getItem("Dunbar-Login-Token")){
               domain: DOMAIN,
               token: sessionStorage.getItem("Dunbar-Login-Token")
             })
-            //You have the profile information.  TODO Put the current information into the exposed form.
             userName.innerHTML = u.name ?? u.nickname ?? u.email
+            //Populate know information into the form inputs.
             for(let prop in u){
                 let textfield = document.querySelector(`input[name='${prop}']`)
                 if(textfield){

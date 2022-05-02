@@ -45,7 +45,7 @@ if(sessionStorage.getItem("Dunbar-Login-Token")){
                 let user_arr = await getAllUsers()
                 for(let user of user_arr){
                     //This presumes they will only have one dunbar role here.  Make sure getAllUsers() accounts for that.
-                    let role = u[DUNBAR_USER_ROLES_CLAIM].roles[0] ?? "Role Not Assigned"
+                    let role = user[DUNBAR_USER_ROLES_CLAIM].roles[0] ?? "Role Not Assigned"
                     role = role.replace("dunbar_user_", "")
                     role = role.charAt(0).toUpperCase() + role.slice(1)
                     //let elem = `<li user="${u.username}"><span class="info username">${user.username}</span>`
@@ -53,8 +53,8 @@ if(sessionStorage.getItem("Dunbar-Login-Token")){
                     elem += `<span class="info role" userid="${user.user_id}"> : ${role}</span>`
                     let buttons = `
                         <div class="actions">
-                            <input class="small" type="button" value="Make Public" onclick="assignRole('${user.user_id}', 'Public')"/>
-                            <input class="small" type="button" value="Make Contributor" onclick="assignRole('${user.user_id}','Contributor')"/>
+                            <input class="small roleBtn" type="button" value="Make Public" onclick="assignRole('${user.user_id}', 'Public')"/>
+                            <input class="small roleBtn" type="button" value="Make Contributor" onclick="assignRole('${user.user_id}','Contributor')"/>
                         </div>
                     `
                     if(role !== "Admin"){
@@ -123,6 +123,9 @@ function getURLHash(variable, url=document.location.href) {
     return false
 }
 
+/**
+ * Use our Auth0 Server back end to ask for all the Dunbap Apps users.
+ */ 
 async function getAllUsers(){
      let users = await fetch("/dunbar-users/manage/getAllUsers", {
         "method" : "GET",

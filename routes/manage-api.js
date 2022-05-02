@@ -30,6 +30,8 @@ router.get('/getAllUsers', async function(req,res,next){
       let filter = {
         "q":`app_metadata.app:"dla"`
       }
+      //FIXME I believe this is limited to 50 users at a time.
+      //https://auth0.com/docs/manage-users/user-search/retrieve-users-with-get-users-endpoint#limitations
       let usersWithRoles = await manager.getUsers(filter)
       .then(async (allUsers) => {
          let mappedUsers = await Promise.all(allUsers.map(async (u) => {
@@ -67,38 +69,6 @@ router.get('/getAllUsers', async function(req,res,next){
   .catch(err => {
     res.status(500).send(err)
   })
-})
-
-
-/**
- * Ask our Dunbar Auth0 for an access token with user management scope.
- */ 
-router.get('/getManagementToken', async function(req,res,next){
-  res.status(501).send("We don't expose this.")
-  /*
-  let token = req.header("Authorization") ?? ""
-  token = token.replace("Bearer ", "")
-  authenticator.getProfile(token)
-  .then(user =>{
-      if(isAdmin(user)){
-        manager.getAccessToken()
-          .then(tok => {
-            console.log("tok is")
-            console.log(tok)
-            res.status(200).send(tok)
-          })
-          .catch(err => {
-            res.status(500).send(err)    
-          })  
-      }
-      else{
-        res.status(500).send("You are not an admin")  
-      }
-  })
-  .catch(err => {
-    res.status(500).send(err)
-  })
-  */
 })
 
 /**

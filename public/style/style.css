@@ -63,8 +63,7 @@ h1 {
 }
 
 .info.role{
-    color:  black;
-    font-weight:  bold;
+    text-transform: uppercase;
 }
 
 .submitBtnPadding{
@@ -87,6 +86,26 @@ h1 {
     border-radius: 20px;
 }
 
+.roleBtn{
+    background-color: white;
+    color: #2F353E;
+    padding: 6px;
+    font-weight: bold;
+    border-radius: 20px;
+}
+
+.roleBtn:hover{
+    background-color: #2F353E;
+    color: white;
+    padding: 6px;
+    font-weight: bold;
+    border-radius: 20px;
+}
+
 .who{
     font-weight:  bold;
+}
+
+#userList li{
+    padding: 10px 0px;
 }
