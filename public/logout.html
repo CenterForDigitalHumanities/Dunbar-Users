@@ -26,7 +26,7 @@
         if (window.confirm("Do you really want to log out?")) {
             const DOMAIN = "cubap.auth0.com"
             const CLIENTID = "z1DuwzGPYKmF7POW9LiAipO5MvKSDERM"
-            const redirect = "http://localhost:3000/dunbar-users/login.html"
+            const redirect = "http://dunbar-users.herokuapp.com/dunbar-users/login.html"
             sessionStorage.removeItem('Dunbar-Login-Token')
             localStorage.removeItem('Dunbar-Login-Token')
             document.cookie = "Dunbar-Login-Token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;"
