@@ -23,7 +23,7 @@
         /**
          * An HTML page instead of an endpoint to initiate a user log out of Dunbar Apps.
          */ 
-        if (window.confirm("Do you really want to log out?")) {
+        if (confirm("Do you really want to log out?") === true) {
             const DOMAIN = "cubap.auth0.com"
             const CLIENTID = "z1DuwzGPYKmF7POW9LiAipO5MvKSDERM"
             const redirect = "http://localhost:3000/dunbar-users/login.html"
@@ -31,7 +31,7 @@
             localStorage.removeItem('Dunbar-Login-Token')
             document.cookie = "Dunbar-Login-Token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;"
             stopHeartbeat()
-            webAuth = new auth0.WebAuth({
+            let webAuth = new auth0.WebAuth({
                 domain:       DOMAIN,
                 clientID:     CLIENTID
             })
@@ -42,7 +42,7 @@
         }
         else{
             //login.html will route them to manage.html or profile.html.
-            window.location="login.html"
+            window.location="manage.html"
         }
     </script>
 </body>
