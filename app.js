@@ -14,7 +14,7 @@ const got = require('got')
 
 const indexRouter = require('./routes/index.js')
 const dunbarRouter = require('./routes/dunbar-users.js')
-const managementRouter = require('./routes/manage.js')
+const managementRouter = require('./routes/manage-api.js')
 
 var app = express()
 

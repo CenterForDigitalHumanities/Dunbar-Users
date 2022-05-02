@@ -3,7 +3,7 @@
 const express = require('express')
 const path = require('path')
 const router = express.Router()
-const managementRouter = require('./manage.js')
+const managementRouter = require('./manage-api.js')
 // public also available at `/dunbar-users` now
 router.use(express.static(path.join(__dirname, '../public')))
 
@@ -14,6 +14,5 @@ router.use('/manage', managementRouter)
 router.get('/', function(req, res, next) {
   res.redirect(301, 'login.html')
 })
-
 
 module.exports = router
