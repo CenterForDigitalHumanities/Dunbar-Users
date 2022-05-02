@@ -2,7 +2,7 @@
 
 const AUDIENCE = "https://cubap.auth0.com/api/v2/"
 const CLIENTID = "z1DuwzGPYKmF7POW9LiAipO5MvKSDERM"
-const DUNBAR_REDIRECT = "http://dunbar-users.herokuapp.com/dunbar-users/manage.html"
+const DUNBAR_REDIRECT = "http://localhost:3000/dunbar-users/manage.html"
 const DOMAIN = "cubap.auth0.com"
 const DUNBAR_USER_ROLES_CLAIM = "http://dunbar.rerum.io/user_roles"
 const DUNBAR_PUBLIC_ROLE = "dunbar_user_public"
@@ -14,7 +14,7 @@ let token = sessionStorage.getItem("Dunbar-Login-Token")
 let authenticator = new auth0.Authentication({
     "domain":     DOMAIN,
     "clientID":   CLIENTID,
-    "scope":"read:roles update:current_user_metadata name nickname username picture email profile openid offline_access"
+    "scope":"read:roles update:current_user_metadata name nickname picture email profile openid offline_access"
 })
 
 let webAuth = new auth0.WebAuth({
@@ -23,7 +23,7 @@ let webAuth = new auth0.WebAuth({
     "audience":   AUDIENCE,
     "responseType" : "id_token token",
     "redirectUri" : DUNBAR_REDIRECT,
-    "scope":"read:roles update:current_user_metadata name nickname username picture email profile openid offline_access"
+    "scope":"read:roles update:current_user_metadata name nickname picture email profile openid offline_access"
 })
 
 let manager = {}
@@ -35,8 +35,6 @@ if(sessionStorage.getItem("Dunbar-Login-Token")){
         if(err){
             console.error(err)
             sessionStorage.removeItem('Dunbar-Login-Token')
-            stopHeartbeat()
-            userName.innerHTML = "Please login again.  Your session expired."
             alert("You logged out or your session expired.  Try logging in again.")
             stopHeartbeat()
             window.location="login.html"
@@ -102,7 +100,7 @@ async function updateUserInfo(event, userid){
     let params = { id: userid }    
     let info = new FormData(event.target)
     let data = Object.fromEntries(info.entries())
-    for(prop in data){
+    for(let prop in data){
         if(data[prop] === "" || data[prop] === null || data[prop] === undefined){
             delete data[prop]
         }

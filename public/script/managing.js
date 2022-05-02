@@ -1,6 +1,6 @@
 const AUDIENCE = "https://cubap.auth0.com/api/v2/"
 const CLIENTID = "z1DuwzGPYKmF7POW9LiAipO5MvKSDERM"
-const DUNBAR_REDIRECT = "http://dunbar-users.herokuapp.com/dunbar-users/manage.html"
+const DUNBAR_REDIRECT = "http://localhost:3000/dunbar-users/manage.html"
 const DOMAIN = "cubap.auth0.com"
 const DUNBAR_USER_ROLES_CLAIM = "http://dunbar.rerum.io/user_roles"
 const DUNBAR_PUBLIC_ROLE = "dunbar_user_public"

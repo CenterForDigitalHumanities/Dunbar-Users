@@ -2,7 +2,7 @@
 
 const AUDIENCE = "https://cubap.auth0.com/api/v2/"
 const CLIENTID = "z1DuwzGPYKmF7POW9LiAipO5MvKSDERM"
-const DUNBAR_REDIRECT = "http://dunbar-users.herokuapp.com/dunbar-users/manage.html"
+const DUNBAR_REDIRECT = "http://localhost:3000/dunbar-users/manage.html"
 const DOMAIN = "cubap.auth0.com"
 const DUNBAR_USER_ROLES_CLAIM = "http://dunbar.rerum.io/user_roles"
 const DUNBAR_PUBLIC_ROLE = "dunbar_user_public"
@@ -12,7 +12,7 @@ const myURL = document.location.href
 let authenticator = new auth0.Authentication({
     "domain":     DOMAIN,
     "clientID":   CLIENTID,
-    "scope":"read:roles update:current_user_metadata name nickname username picture email profile openid offline_access"
+    "scope":"read:roles update:current_user_metadata name nickname picture email profile openid offline_access"
 })
 let webAuth = new auth0.WebAuth({
     "domain":       DOMAIN,
@@ -20,7 +20,7 @@ let webAuth = new auth0.WebAuth({
     "audience":   AUDIENCE,
     "responseType" : "id_token token",
     "redirectUri" : DUNBAR_REDIRECT,
-    "scope":"read:roles update:current_user_metadata name nickname username picture email profile openid offline_access",
+    "scope":"read:roles update:current_user_metadata name nickname picture email profile openid offline_access",
 })
 if(myURL.indexOf("access_token=") > -1){
     sessionStorage.setItem('Dunbar-Login-Token', getURLHash("access_token"))
@@ -33,14 +33,11 @@ if(sessionStorage.getItem("Dunbar-Login-Token")){
         if(err){
             console.error(err)
             sessionStorage.removeItem('Dunbar-Login-Token')
-            stopHeartbeat()
-            userName.innerHTML = "Please login again.  Your session expired."
             alert("You logged out or your session expired.  Try logging in again.")
             stopHeartbeat()
             window.location = "login.html"
         }
         else{
-            //If this user is an admin, get them a management token
             if(isAdmin(u)){
                 startHeartbeat(webAuth)
                 userList.innerHTML = ""

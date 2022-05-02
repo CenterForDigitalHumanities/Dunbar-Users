@@ -1,8 +1,11 @@
 #!/usr/bin/env node
 
-//Note that all of this is fresh upon entering the page with a good login token.
-//Instead of a timer, we can refresh these upon page focus/action
-//It depends how quick tokens will die.
+/**
+ * Note that all of this is fresh upon entering the page with a good login token.
+ * Instead of a timer, we can refresh these upon page focus/action
+ * It depends how quick tokens will die.
+ */ 
+
 login_beat = null
 function startHeartbeat(webAuth){
     login_beat = setInterval(async function(){
@@ -12,7 +15,6 @@ function startHeartbeat(webAuth){
                     console.error(err1)
                     sessionStorage.removeItem('Dunbar-Login-Token')
                     stopHeartbeat()
-                    userName.innerHTML = "Please login again.  Your session expired."
                     alert("You logged out or your session expired.  Try logging in again.")
                     stopHeartbeat()
                     window.location = "login.html"
@@ -24,7 +26,7 @@ function startHeartbeat(webAuth){
                             console.error(err2)
                             sessionStorage.removeItem('Dunbar-Login-Token')
                             stopHeartbeat()
-                            userName.innerHTML = "Please login again.  checkSession() failure"
+                            window.location = "login.html"
                         }
                         else{
                             sessionStorage.setItem("Dunbar-Login-Token", result.accessToken)

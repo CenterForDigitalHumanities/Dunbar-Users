@@ -25,7 +25,7 @@
             <div class="panel-heading"> <span class="panel-title">Admin Login</span> </div>
             <div class="panel-body">
                 <p class="handHoldy">
-                    Admins can log in below.
+                    Please login below.  If you do not have a Dunbar Apps account, you will have the option to register for one.
                 </p>
                 <div>
                     <span class="status_header"> Dunbar App Agent </span>
@@ -41,7 +41,7 @@
         <script type="text/javascript">
             const AUDIENCE = "https://cubap.auth0.com/api/v2/"
             const CLIENTID = "z1DuwzGPYKmF7POW9LiAipO5MvKSDERM"
-            const DUNBAR_REDIRECT = "http://dunbar-users.herokuapp.com/dunbar-users/manage.html"
+            const DUNBAR_REDIRECT = "http://localhost:3000/dunbar-users/manage.html"
             const DOMAIN = "cubap.auth0.com"
             let webAuth = null
             //This is an Auth0 Bearer, a management access token
@@ -81,7 +81,7 @@
                 })
                 webAuth.authorize({
                     "authParamsMap": {'app': 'dla'},
-                    "scope":"read:roles update:current_user_metadata name nickname username picture email profile openid offline_access",
+                    "scope":"read:roles update:current_user_metadata name nickname picture email profile openid offline_access",
                     "redirectUri": DUNBAR_REDIRECT,
                     "responseType" : "id_token token"
                 })
