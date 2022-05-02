@@ -1,0 +1,92 @@
+#msg {
+    color: green;
+    font-weight: bold;
+}
+
+#intro {
+    color: #979A9E;
+    font-size: 12pt;
+}
+
+#userForm{
+    width: fit-content;
+    border: 2px solid black;
+    padding: 10px;
+}
+
+body {
+    font-family: 'Open Sans', sans-serif;
+    color: #979A9E;
+    background-color: #2F353E;
+}
+
+input[type="text"] {
+    background-color: #ccc;
+    color: black;
+    font-weight: bold;
+    font-family: serif;
+    font-size: 14pt;
+}
+
+h1 {
+    cursor: pointer;
+    font-weight: 300;
+    font-family: 'Raleway', sans-serif;
+    margin-bottom: 10px;
+}
+
+.navbar-brand {
+    float: none;
+    font-size: 2rem;
+    line-height: 1.5;
+    margin-bottom: 20px;
+}
+
+.panel-body {
+    color: initial;
+}
+
+.panel {
+    word-break: break-word;
+}
+
+.status_header {
+    color: gray;
+}
+
+.info{
+    display:  inline-block;
+}
+
+.info.username{
+    margin-right: 10px;
+}
+
+.info.role{
+    color:  black;
+    font-weight:  bold;
+}
+
+.submitBtnPadding{
+    padding: 11px 1px 5px 112px;
+}
+
+.submitBtn{
+    background-color: white;
+    color: #2F353E;
+    padding: 6px;
+    font-weight: bold;
+    border-radius: 20px;
+}
+
+.submitBtn:hover{
+    background-color: #2F353E;
+    color: white;
+    padding: 6px;
+    font-weight: bold;
+    border-radius: 20px;
+}
+
+.who{
+    font-weight:  bold;
+}
