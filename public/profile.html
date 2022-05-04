@@ -1,48 +1,77 @@
 <!DOCTYPE html>
 <html lang="en-us">
 
-    <head>
-        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <title>Dunbar Profile Management</title>
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
-        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css">
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.2/jquery.min.js"></script>
-        <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
-        <link rel="stylesheet" href="./style/style.css">
-    </head>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>Dunbar Profile Management</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="./style/style.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css">
+    <script src="https://cdn.auth0.com/js/auth0/9.19.0/auth0.min.js" defer></script>
+    <script src="./script/heartbeat.js" type="text/javascript" defer></script>
+    <script src="./script/profile.js" type="text/javascript" defer></script>
+</head>
 
-    <body class="container">
-        <h1 onclick="window.location='login.html'" target="_blank" class="navbar-brand"><i class="fa fa-cubes"></i>
-            dunbar</h1>
-        <div class='' id="intro">
-            <p>
-                Update your user profile for the Dunbar Apps
-            </p>
-        </div>
-        <div class='panel panel-info' name="block">
-            <div class="who">
-                Logged in as <span id="userName">Not Logged In</span>
+<body>
+    <header class="container">
+        <nav class="nav">
+            <div class="nav-left">
+                <a class="brand" href="login.html"><img
+                        src="https://cdm16007.contentdm.oclc.org/iiif/2/p267401coll32:4553/100,0,1100,1100/150,150/0/default.jpg"
+                        alt="logo"></a>
+                <h1 class="brand text-light">
+                    Dunbar Library &amp; Archive Users&nbsp;
+                    <i class="fa fa-cubes"></i>
+                </h1>
             </div>
-            <h4> Dunbar User Profile </h4>
-            <form id="userForm">
-                <div> Username </div>
-                <input name="name" type="text" /> 
-                <div> Nickname </div>
-                <input name="nickname" type="text" />   
-                <div> Email </div>
-                <input name="email" type="text" />   
-                <div> Picture </div>
-                <input name="picture" type="text" />  
-                <div class="submitBtnPadding">
-                    <input class="submitBtn" type="submit" value="Update User Info"/> 
+            <div class="nav-right">
+            </div>
+        </nav>
+    </header>
+    <div class="container">
+        <p class="text-light">
+            Update your user profile for the Dunbar Apps
+        </p>
+        <div class="row">
+            <form id="userForm" class="card col">
+                <header>
+                    <h4>Edit Profile</h4>
+                </header>
+                <div class="row">
+                    <div class="col">
+                        <label> Username </label>
+                        <input name="name" type="text" />
+                        <label> Nickname </label>
+                        <input name="nickname" type="text" />
+                        <label> Email </label>
+                        <input name="email" type="text" />
+                        <label> Picture </label>
+                        <input name="picture" type="url" />
+                    </div>
                 </div>
+                <footer class="is-right row">
+                    <input class="button outline text-dark col" type="submit" value="Update User Info" />
+                </footer>
             </form>
+            <div class="card col is-center">
+                <p>
+                    <em>
+                        Logged in as <span id="userName" class="no-break">Not Logged In</span>
+                    </em> 
+                    <a class="button default" href="./logout.html">Logout</a>
+                </p>
+                <figure>
+                    <span data-picture=""></span>
+                    <figcaption class="text-center">
+                        <strong><span data-nickname="" class=""></span></strong>
+                        &lt;<span data-email="" class="no-break"></span>&gt;
+                    </figcaption>
+                </figure>
+            </div>
         </div>
-        <script src="https://cdn.auth0.com/js/auth0/9.19.0/auth0.min.js"></script>
-        <script src="./script/heartbeat.js" type="text/javascript"></script>
-        <script src="./script/profile.js" type="text/javascript"></script>
-    </body>
+    </div>
+    </div>
+</body>
 
 </html>

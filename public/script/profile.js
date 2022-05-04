@@ -2,7 +2,7 @@
 
 const AUDIENCE = "https://cubap.auth0.com/api/v2/"
 const CLIENTID = "z1DuwzGPYKmF7POW9LiAipO5MvKSDERM"
-const DUNBAR_REDIRECT = "http://localhost:3000/dunbar-users/manage.html"
+const DUNBAR_REDIRECT = origin+"/manage.html"
 const DOMAIN = "cubap.auth0.com"
 const DUNBAR_USER_ROLES_CLAIM = "http://dunbar.rerum.io/user_roles"
 const DUNBAR_PUBLIC_ROLE = "dunbar_user_public"
@@ -48,11 +48,12 @@ if(sessionStorage.getItem("Dunbar-Login-Token")){
             userName.innerHTML = u.name ?? u.nickname ?? u.email
             //Populate know information into the form inputs.
             for(let prop in u){
-                let textfield = document.querySelector(`input[name='${prop}']`)
-                if(textfield){
-                    textfield.value = u[prop]
-                }
+                try{
+                    document.querySelector(`input[name='${prop}']`)?.setAttribute('value',u[prop])
+                    document.querySelector(`[data-${prop}]`)?.setAttribute(`data-${prop}`,u[prop])
+                } catch (err) {}
             }
+            document.querySelector(`[data-picture]`).innerHTML = `<img src="${u.picture}"/>`
             const form = document.getElementById('userForm')
             form.addEventListener('submit', (e) =>{
                 updateUserInfo(e, u.sub)
