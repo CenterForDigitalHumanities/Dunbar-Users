@@ -66,6 +66,9 @@ router.put('/updateProfileInfo', async function(req,res,next){
       res.status(500).send(err)
     })  
   }
+  else{
+    res.status(403).send("You must be a Dunbar Apps user.  Please provide an access token in the Authorization header.")
+  }
 })
 
 /**
@@ -74,51 +77,56 @@ router.put('/updateProfileInfo', async function(req,res,next){
 router.get('/getAllUsers', async function(req,res,next){
   let token = req.header("Authorization") ?? ""
   token = token.replace("Bearer ", "")
-  authenticator.getProfile(token)
-  .then(async (current_user) => {
-    if(isAdmin(current_user)){
-      let filter = {
-        "q":`app_metadata.app:"dla"`
-      }
-      //FIXME I believe this is limited to 50 users at a time.
-      //https://auth0.com/docs/manage-users/user-search/retrieve-users-with-get-users-endpoint#limitations
-      let usersWithRoles = await manager.getUsers(filter)
-      .then(async (allUsers) => {
-         let mappedUsers = await Promise.all(allUsers.map(async (u) => {
-          let roles = await manager.getUserRoles({"id":u.user_id})
-          .then(roles => {
-            let r = {"roles": []}
-            if(roles && roles.length) {
-              //Only consider the dunbar roles, filter out others
-              r.roles = roles
-                .filter(roleObj => roleObj.name.includes("dunbar_user"))
-                .map(roleObj => roleObj.name)
-            }
-            u[process.env.DUNBAR_ROLES_CLAIM] = r
+  if(token){
+    authenticator.getProfile(token)
+      .then(async (current_user) => {
+        if(isAdmin(current_user)){
+          let filter = {
+            "q":`app_metadata.app:"dla"`
+          }
+          //FIXME I believe this is limited to 50 users at a time.
+          //https://auth0.com/docs/manage-users/user-search/retrieve-users-with-get-users-endpoint#limitations
+          let usersWithRoles = await manager.getUsers(filter)
+          .then(async (allUsers) => {
+             let mappedUsers = await Promise.all(allUsers.map(async (u) => {
+              let roles = await manager.getUserRoles({"id":u.user_id})
+              .then(roles => {
+                let r = {"roles": []}
+                if(roles && roles.length) {
+                  //Only consider the dunbar roles, filter out others
+                  r.roles = roles
+                    .filter(roleObj => roleObj.name.includes("dunbar_user"))
+                    .map(roleObj => roleObj.name)
+                }
+                u[process.env.DUNBAR_ROLES_CLAIM] = r
+              })
+              .catch(err => {
+                  //Could not get user roles.
+                  console.error(err)
+                  return []
+              })
+              return u 
+            }))
+            return mappedUsers
           })
           .catch(err => {
-              //Could not get user roles.
-              console.error(err)
-              return []
-          })
-          return u 
-        }))
-        return mappedUsers
+            console.error("Error getting users in back end")
+            console.error(err)
+            res.status(500).send(err)    
+          })  
+          res.status(200).json(usersWithRoles)
+        }
+        else{
+          res.status(401).send("You are not an admin")  
+        }
       })
       .catch(err => {
-        console.error("Error getting users in back end")
-        console.error(err)
-        res.status(500).send(err)    
+        res.status(500).send(err)
       })  
-      res.status(200).json(usersWithRoles)
     }
     else{
-      res.status(401).send("You are not an admin")  
+      res.status(403).send("You must be a Dunbar Apps user.  Please provide an access token in the Authorization header.")
     }
-  })
-  .catch(err => {
-    res.status(500).send(err)
-  })
 })
 
 /**
@@ -161,7 +169,7 @@ router.get('/assignPublicRole/:_id', async function(req,res,next){
     })  
   }
   else{
-    res.status(403).send("You must supply an access token in the Authorization request header.")
+    res.status(403).send("You must be a Dunbar Apps user.  Please provide an access token in the Authorization header.")
   }
 })
 
@@ -205,7 +213,7 @@ let token = req.header("Authorization") ?? ""
     })
   }
   else{
-    res.status(403).send("You must supply an access token in the Authorization request header.")
+    res.status(403).send("You must be a Dunbar Apps user.  Please provide an access token in the Authorization header.")
   }
 })
 
