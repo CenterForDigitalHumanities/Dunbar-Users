@@ -8,22 +8,21 @@ const DUNBAR_USER_ROLES_CLAIM = "http://dunbar.rerum.io/user_roles"
 const DUNBAR_PUBLIC_ROLE = "dunbar_user_public"
 const DUNBAR_CONTRIBUTOR_ROLE = "dunbar_user_contributor"
 const DUNBAR_ADMIN_ROLE = "dunbar_user_admin"
-const myURL = window.location
-let token = sessionStorage.getItem("Dunbar-Login-Token")
+const myURL = document.location.href
 
 let authenticator = new auth0.Authentication({
     "domain":     DOMAIN,
     "clientID":   CLIENTID,
-    "scope":"read:roles update:current_user_metadata name nickname picture email profile openid offline_access"
+    "scope":"read:roles update:current_user_metadata read:current_user name nickname picture email profile openid offline_access"
 })
 
 let webAuth = new auth0.WebAuth({
     "domain":       DOMAIN,
     "clientID":     CLIENTID,
     "audience":   AUDIENCE,
-    "responseType" : "id_token token",
+    "responseType" : "token",
     "redirectUri" : DUNBAR_REDIRECT,
-    "scope":"read:roles update:current_user_metadata name nickname picture email profile openid offline_access"
+    "scope":"read:roles update:current_user_metadata read:current_user name nickname picture email profile openid offline_access"
 })
 
 let manager = {}
@@ -95,6 +94,44 @@ else{
     openid
     offline_access
  */ 
+
+/*
+async function updateUserInfo(event, userid){
+    event.preventDefault()
+    let info = new FormData(event.target)
+    let data = Object.fromEntries(info.entries())
+    for(let prop in data){
+        if(data[prop] === "" || data[prop] === null || data[prop] === undefined){
+            delete data[prop]
+        }
+    }
+    data.user_id = userid
+    if(confirm("Really submit these profile changes?")){
+        let updatedUser = await fetch("/dunbar-users/manage/updateProfileInfo",{
+            method: 'PUT', 
+            cache: 'default',
+            headers: {
+              'Authorization': `Bearer ${sessionStorage.getItem("Dunbar-Login-Token")}`,
+              'Content-Type' : "application/json; charset=utf-8"
+            },
+            body:JSON.stringify(data)
+        })
+        .then(r => r.json())
+        .catch(err => {
+            console.error("User Not Updated")
+            console.error(err)
+            return {}
+        })    
+        if(updateUser.user_id){
+            alert("User Info Updated!")
+        }
+        else{
+            alert("User Info Update Failed!")
+        }
+    }
+}
+*/
+
 async function updateUserInfo(event, userid){
     event.preventDefault()
     let params = { id: userid }    

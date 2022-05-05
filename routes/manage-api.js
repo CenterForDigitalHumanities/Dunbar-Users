@@ -19,14 +19,64 @@ let authenticator = new AuthenticationClient({
 })
 
 /**
+ * Let Dunbar Apps Users update THEIR OWN profile info.
+ * 
+ * Make sure the user making the request is the user to update.
+ */ 
+router.put('/updateProfileInfo', async function(req,res,next){
+  console.log("update profile info")
+  let token = req.header("Authorization") ?? ""
+  token = token.replace("Bearer ", "")
+  if(token){
+    authenticator.getProfile(token)
+    .then(async (current_user) => {
+      if(isDunbarUser(current_user)){
+        //The user object is in the body, and the id is present or fail.
+        let userObj = req.body ?? {}
+        const userid = userObj.sub ?? userObj.user_id ?? userObj.id ?? ""
+        delete userObj.sub
+        delete userObj.user_id
+        delete userObj.id
+        if(userid){
+          if(current_user.sub === userid){
+            let params = { id: current_user.sub }
+            manager.updateUser(params, userObj)
+            .then(user => {
+              res.status(200).json(user)
+            })
+            .catch(err => {
+              console.error("Trouble updating using profile.")
+              console.error(err)
+              res.status(500).send(err)
+            })
+          }
+          else{
+            res.status(401).send("You can only update your own profile.  Please check the id of the user in the request body.")
+          }
+        }
+        else{
+          res.status(400).send("The user object was not JSON or did not have an id.")  
+        }
+      }
+      else{
+        res.status(401).send("You are not a Dunbar Apps user, this API is not for you.")  
+      }
+    })
+    .catch(err => {
+      res.status(500).send(err)
+    })  
+  }
+})
+
+/**
  * Get all the users from the Auth0 Tenant with app "dla".
  */ 
 router.get('/getAllUsers', async function(req,res,next){
   let token = req.header("Authorization") ?? ""
   token = token.replace("Bearer ", "")
   authenticator.getProfile(token)
-  .then(async (current_dunbar_users) => {
-    if(isAdmin(current_dunbar_users)){
+  .then(async (current_user) => {
+    if(isAdmin(current_user)){
       let filter = {
         "q":`app_metadata.app:"dla"`
       }

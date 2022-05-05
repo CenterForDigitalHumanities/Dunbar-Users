@@ -81,7 +81,7 @@
                 })
                 webAuth.authorize({
                     "authParamsMap": {'app': 'dla'},
-                    "scope":"read:roles update:current_user_metadata name nickname picture email profile openid offline_access",
+                    "scope":"read:roles update:current_user_metadata read:current_user name nickname picture email profile openid offline_access",
                     "redirectUri": DUNBAR_REDIRECT,
                     "responseType" : "id_token token"
                 })
