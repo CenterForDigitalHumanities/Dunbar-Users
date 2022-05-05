@@ -6,21 +6,27 @@
         <title>Dunbar Users Portal</title>
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link rel="stylesheet" href="./style/style.css">
-        <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
-        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css">
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.2/jquery.min.js"></script>
-        <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
-        <link rel="stylesheet" href="./style/style.css">
     </head>
-
-    <body class="container">
-        <h1 onclick="window.location='login.html'" target="_blank" class="navbar-brand"><i class="fa fa-cubes"></i>
-            dunbar</h1>
-        <div class='' id="intro">
+    <body>
+        <header class="container">
+            <nav class="nav">
+                <div class="nav-left">
+                    <a class="brand" href="login.html"><img
+                            src="https://cdm16007.contentdm.oclc.org/iiif/2/p267401coll32:4553/100,0,1100,1100/150,150/0/default.jpg"
+                            alt="logo"></a>
+                    <h1 class="brand text-light">
+                        Dunbar Library &amp; Archive Users&nbsp;
+                        <i class="fa fa-cubes"></i>
+                    </h1>
+                </div>
+                <div class="nav-right">
+                </div>
+            </nav>
+        </header>
+            <div class='container'>
             <p>
                 We are so glad you are interested in researching the works of Paul Dunbar.
             </p>
-        </div>
         <div class='panel panel-info' name="block">
             <div class="panel-heading"> <span class="panel-title">Admin Login</span> </div>
             <div class="panel-body">
@@ -73,7 +79,7 @@
              *  For non-admins, some of the front end needs ID token level scope for managing the current user.
              *  This is covered by using both token types in responseType.
              */  
-            $("#login").click(ev => {
+            login.onclick = ev => {
                 webAuth = new auth0.WebAuth({
                     "domain":       DOMAIN,
                     "clientID":     CLIENTID,
@@ -85,7 +91,7 @@
                     "redirectUri": DUNBAR_REDIRECT,
                     "responseType" : "id_token token"
                 })
-            })     
+            }
         </script>
     </body>
 

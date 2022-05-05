@@ -6,26 +6,35 @@
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <title>Dunbar Users Portal</title>
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
-        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css">
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.2/jquery.min.js"></script>
-        <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
         <link rel="stylesheet" href="./style/style.css">
+        <script src="https://cdn.auth0.com/js/auth0/9.19.0/auth0.min.js"></script>
+        <script src="./script/manage.js" type="text/javascript" defer></script>
+        <script src="./script/heartbeat.js" type="text/javascript" defer></script>
     </head>
-
-    <body class="container">
-        <h1 onclick="window.location='login.html'" target="_blank" class="navbar-brand"><i class="fa fa-cubes"></i>
-            dunbar</h1>
-        <div class='' id="intro">
+    <body>
+        <header class="container">
+            <nav class="nav">
+                <div class="nav-left">
+                    <a class="brand" href="login.html"><img
+                            src="https://cdm16007.contentdm.oclc.org/iiif/2/p267401coll32:4553/100,0,1100,1100/150,150/0/default.jpg"
+                            alt="logo"></a>
+                    <h1 class="brand text-light">
+                        Dunbar Library &amp; Archive Users&nbsp;
+                        <i class="fa fa-cubes"></i>
+                    </h1>
+                </div>
+                <div class="nav-right text-light">
+                    <span id="userName">Not Logged In</span>
+                    <a class="button default tag is-small" href="./logout.html">Logout</a>
+                </div>
+            </nav>
+        </header>
+    
+        <div class='container card'>
             <p>
                 Manage Dunbar Apps users' roles.  Admins can make other users 'Public' or 'Contributor'.
                 Note that profile information updating is not available at this time.
             </p>
-        </div>
-        <div class='panel panel-info' name="block">
-            <div class="who">
-                Logged in as <span id="userName">Not Logged In</span>
-            </div>
             <h4> Dunbar Users List </h4>
             <ul id="userList">
                 <li>
@@ -33,9 +42,6 @@
                 </li>
             </ul>
         </div>
-        <script src="https://cdn.auth0.com/js/auth0/9.19.0/auth0.min.js"></script>
-        <script src="./script/manage.js" type="text/javascript"></script>
-        <script src="./script/heartbeat.js" type="text/javascript"></script>
     </body>
 
 </html>

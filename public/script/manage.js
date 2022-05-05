@@ -144,6 +144,6 @@ async function getAllUsers(){
 }
 
 function isAdmin(user){
-    let roles = user[DUNBAR_USER_ROLES_CLAIM].roles ?? []
+    let roles = user[DUNBAR_USER_ROLES_CLAIM]?.roles ?? []
     return roles.includes(DUNBAR_ADMIN_ROLE)
 }
