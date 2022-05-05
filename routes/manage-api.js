@@ -129,35 +129,40 @@ router.get('/getAllUsers', async function(req,res,next){
 router.get('/assignPublicRole/:_id', async function(req,res,next){
   let token = req.header("Authorization") ?? ""
   token = token.replace("Bearer ", "")
-  authenticator.getProfile(token)
-  .then(user =>{
-    if(isAdmin(user)){
-      let params =  { "id" : process.env.DUNBAR_PUBLIC_ROLE_ID}
-      let data = { "users" : [req.params._id]}
-      manager.assignUsersToRole(params, data)
-      .then(resp => {
-        //unassign from other Dunbar roles
-        params = {"id" : req.params._id}
-        data = { "roles" : [process.env.DUNBAR_CONTRIBUTOR_ROLE_ID, process.env.DUNBAR_ADMIN_ROLE_ID]}
-        manager.removeRolesFromUser(params, data)
-        .then(resp2 =>{
-          res.status(200).send("Public role was successfully assinged to the user")
+  if(token){
+      authenticator.getProfile(token)
+    .then(user =>{
+      if(isAdmin(user)){
+        let params =  { "id" : process.env.DUNBAR_PUBLIC_ROLE_ID}
+        let data = { "users" : [req.params._id]}
+        manager.assignUsersToRole(params, data)
+        .then(resp => {
+          //unassign from other Dunbar roles
+          params = {"id" : req.params._id}
+          data = { "roles" : [process.env.DUNBAR_CONTRIBUTOR_ROLE_ID, process.env.DUNBAR_ADMIN_ROLE_ID]}
+          manager.removeRolesFromUser(params, data)
+          .then(resp2 =>{
+            res.status(200).send("Public role was successfully assinged to the user")
+          })
+          .catch(err => {
+            res.status(500).send(err)  
+          })  
         })
         .catch(err => {
           res.status(500).send(err)  
-        })  
-      })
-      .catch(err => {
-        res.status(500).send(err)  
-      })
-    }
-    else{
-      res.status(500).send("You are not an admin")  
-    }
-  })
-  .catch(err => {
-    res.status(500).send(err)
-  })
+        })
+      }
+      else{
+        res.status(401).send("You are not an admin")  
+      }
+    })
+    .catch(err => {
+      res.status(401).send("Could not confirm this is a Dunbar Apps user.")
+    })  
+  }
+  else{
+    res.status(403).send("You must supply an access token in the Authorization request header.")
+  }
 })
 
 /**
@@ -168,63 +173,24 @@ router.get('/assignPublicRole/:_id', async function(req,res,next){
 router.get('/assignContributorRole/:_id', async function(req,res,next){
 let token = req.header("Authorization") ?? ""
   token = token.replace("Bearer ", "")
-  authenticator.getProfile(token)
-  .then(user =>{
-    if(isAdmin(user)){
-      let params =  { "id" : process.env.DUNBAR_CONTRIBUTOR_ROLE_ID}
-      let data = { "users" : [req.params._id]}
-      manager.assignUsersToRole(params, data)
-      .then(resp => {
-        //unassign from other Dunbar roles
-        params = {"id" : req.params._id}
-        data = { "roles" : [process.env.DUNBAR_PUBLIC_ROLE_ID, process.env.DUNBAR_ADMIN_ROLE_ID]}
-        manager.removeRolesFromUser(params, data)
-        .then(resp2 =>{
-            res.status(200).send("Contributor role was successfully assinged to the user")
-        })
-        .catch(err => {
-          res.status(500).send(err)  
-        })  
-      })
-      .catch(err => {
-        res.status(500).send(err)  
-      })
-    }
-    else{
-      res.status(500).send("You are not an admin")  
-    }
-  })
-  .catch(err => {
-    res.status(500).send(err)
-  })
-})
-
-/**
- * Tell our Dunbar Auth0 to assign the given user id to the Dunbar Admin role.
- * Other roles are removed.
- */ 
-router.post('/assignAdminRole/:_id', async function(req,res,next){
-  res.status(501).send("We don't expose this.")
-  /*
-  let token = req.header("Authorization") ?? ""
-  token = token.replace("Bearer ", "")
-  authenticator.getProfile(token)
-  .then(user =>{
+  if(token){
+    authenticator.getProfile(token)
+    .then(user =>{
       if(isAdmin(user)){
-        let params =  { "id" : process.env.DUNBAR_ADMIN_ROLE_ID}
+        let params =  { "id" : process.env.DUNBAR_CONTRIBUTOR_ROLE_ID}
         let data = { "users" : [req.params._id]}
         manager.assignUsersToRole(params, data)
         .then(resp => {
-            //unassign from other Dunbar roles
-            params = {"id" : req.params._id}
-            data = { "roles" : [process.env.DUNBAR_CONTRIBUTOR_ROLE_ID, process.env.DUNBAR_PUBLIC_ROLE_ID]}
-            manager.removeRolesFromUser(params, data)
-            .then(resp2 =>{
-                res.status(200).send("Admin role was successfully assinged to the user")
-            })
-            .catch(err => {
-              res.status(500).send(err)  
-            })  
+          //unassign from other Dunbar roles
+          params = {"id" : req.params._id}
+          data = { "roles" : [process.env.DUNBAR_PUBLIC_ROLE_ID, process.env.DUNBAR_ADMIN_ROLE_ID]}
+          manager.removeRolesFromUser(params, data)
+          .then(resp2 =>{
+              res.status(200).send("Contributor role was successfully assinged to the user")
+          })
+          .catch(err => {
+            res.status(500).send(err)  
+          })  
         })
         .catch(err => {
           res.status(500).send(err)  
@@ -233,11 +199,22 @@ router.post('/assignAdminRole/:_id', async function(req,res,next){
       else{
         res.status(500).send("You are not an admin")  
       }
-  })
-  .catch(err => {
-    res.status(500).send(err)
-  })
-  */
+    })
+    .catch(err => {
+      res.status(500).send(err)
+    })
+  }
+  else{
+    res.status(403).send("You must supply an access token in the Authorization request header.")
+  }
+})
+
+/**
+ * Tell our Dunbar Auth0 to assign the given user id to the Dunbar Admin role.
+ * Other roles are removed.
+ */ 
+router.post('/assignAdminRole/:_id', async function(req,res,next){
+  res.status(501).send("We don't expose this.")
 })
 
 /**
