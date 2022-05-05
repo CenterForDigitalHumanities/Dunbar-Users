@@ -47,14 +47,13 @@ if(sessionStorage.getItem("Dunbar-Login-Token")){
                     //This presumes they will only have one dunbar role here.  Make sure getAllUsers() accounts for that.
                     let role = user[DUNBAR_USER_ROLES_CLAIM].roles[0] ?? "Role Not Assigned"
                     role = role.replace("dunbar_user_", "")
-                    role = role.charAt(0).toUpperCase() + role.slice(1)
                     //let elem = `<li user="${u.username}"><span class="info username">${user.username}</span>`
                     let elem = `<li user="${u.name}"><span class="info username">${user.name}</span>`
                     elem += `<span class="info role" userid="${user.user_id}"> : ${role}</span>`
                     let buttons = `
                         <div class="actions">
-                            <input class="small roleBtn" type="button" value="Make Public" onclick="assignRole('${user.user_id}', 'Public')"/>
-                            <input class="small roleBtn" type="button" value="Make Contributor" onclick="assignRole('${user.user_id}','Contributor')"/>
+                            <input class="tag is-small ${role==="public" ? "bg-dark" : "bg-light"}" type="button" value="Make Public" onclick="assignRole('${user.user_id}', 'Public')"/>
+                            <input class="tag is-small ${role==="contributor" ? "bg-dark" : "bg-light"}" type="button" value="Make Contributor" onclick="assignRole('${user.user_id}','Contributor')"/>
                         </div>
                     `
                     if(role !== "Admin"){

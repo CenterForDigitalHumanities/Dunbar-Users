@@ -55,8 +55,8 @@ if(sessionStorage.getItem("Dunbar-Login-Token")){
                     elem += `<span class="info role" userid="${u.user_id}"> : ${role}</span>`
                     let buttons = `
                         <div class="actions">
-                            <input class="small" type="button" value="Make Public" onclick="assignRole('${u.user_id}', 'Public')"/>
-                            <input class="small" type="button" value="Make Contributor" onclick="assignRole('${u.user_id}','Contributor')"/>
+                            <input class="tag is-small" type="button" value="Make Public" onclick="assignRole('${u.user_id}', 'Public')"/>
+                            <input class="tag is-small" type="button" value="Make Contributor" onclick="assignRole('${u.user_id}','Contributor')"/>
                         </div>
                     `
                     if(role !== "Admin"){
