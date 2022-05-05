@@ -12,7 +12,7 @@ const myURL = document.location.href
 let authenticator = new auth0.Authentication({
     "domain":     DOMAIN,
     "clientID":   CLIENTID,
-    "scope":"read:roles update:current_user_metadata name nickname picture email profile openid offline_access"
+    "scope":"read:roles update:current_user_metadata read:current_user name nickname picture email profile openid offline_access"
 })
 let webAuth = new auth0.WebAuth({
     "domain":       DOMAIN,
@@ -20,7 +20,7 @@ let webAuth = new auth0.WebAuth({
     "audience":   AUDIENCE,
     "responseType" : "id_token token",
     "redirectUri" : DUNBAR_REDIRECT,
-    "scope":"read:roles update:current_user_metadata name nickname picture email profile openid offline_access",
+    "scope":"read:roles update:current_user_metadata read:current_user name nickname picture email profile openid offline_access",
 })
 if(myURL.indexOf("access_token=") > -1){
     sessionStorage.setItem('Dunbar-Login-Token', getURLHash("access_token"))
