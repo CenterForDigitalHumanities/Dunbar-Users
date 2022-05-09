@@ -9,7 +9,7 @@ function startHeartbeat(webAuth){
   //Auth0 Heartbeat that keeps the access token fresh.
     beat = setInterval(async function(){
       console.log("beat...")
-      if(sessionStorage.getItem("Dunbar-Token")){
+      if(localStorage.getItem("Dunbar-Token")){
         console.log("token")
         webAuth.checkSession({
           "audience": 'https://cubap.auth0.com/api/v2/',
@@ -20,13 +20,13 @@ function startHeartbeat(webAuth){
           if(err){
             console.log("Check Session error")
             console.error(e)
-            sessionStorage.removeItem("Dunbar-Token")
-            sessionStorage.removeItem("Agent-URI") 
-            sessionStorage.removeItem("Dunbar-User")
+            localStorage.removeItem("Dunbar-Token")
+            localStorage.removeItem("Agent-URI") 
+            localStorage.removeItem("Dunbar-User")
             stopHeartbeat()
           }
           else{
-            sessionStorage.setItem("Dunbar-Token", authResult.access_token)
+            localStorage.setItem("Dunbar-Token", authResult.access_token)
           }
         })
       }

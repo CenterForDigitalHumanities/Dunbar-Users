@@ -20,19 +20,19 @@ let webAuth = new auth0.WebAuth({
     "redirectUri" : DUNBAR_REDIRECT,
     "scope":"read:roles update:current_user_metadata name nickname picture email profile openid offline_access",
 })
-let agent = sessionStorage.getItem("Agent-URI")        
+let agent = localStorage.getItem("Agent-URI")        
 if(myURL.indexOf("access_token=") > -1){
-    sessionStorage.setItem('Dunbar-Login-Token', getURLHash("access_token"))
+    localStorage.setItem('Dunbar-Login-Token', getURLHash("access_token"))
 }
 //You can trust the token.  However, it may have expired.
-if(sessionStorage.getItem("Dunbar-Login-Token")){
-    //A token was in sessionStorage, so there was a login during this window session.
+if(localStorage.getItem("Dunbar-Login-Token")){
+    //A token was in localStorage, so there was a login during this window session.
     //An access token from login is stored. Let's use it to get THIS USER's info.  If it fails, the user needs to login again.
-    authenticator.userInfo(sessionStorage.getItem("Dunbar-Login-Token"), async function(err, u){
+    authenticator.userInfo(localStorage.getItem("Dunbar-Login-Token"), async function(err, u){
         if(err){
             console.error(err)
-            sessionStorage.removeItem('Agent-URI')
-            sessionStorage.removeItem('Dunbar-Login-Token')
+            localStorage.removeItem('Agent-URI')
+            localStorage.removeItem('Dunbar-Login-Token')
             stopHeartbeat()
             agentLink.innerHTML = "Please login again.  Your session expired."
             alert("You logged out or your session expired.  Try logging in again.")
@@ -44,7 +44,7 @@ if(sessionStorage.getItem("Dunbar-Login-Token")){
                 userList.innerHTML = ""
                 let a = u["http://store.rerum.io/agent"]
                 agentLink.innerHTML = a
-                sessionStorage.setItem('Agent-URI', a)
+                localStorage.setItem('Agent-URI', a)
                 let user_arr = await getAllUsers()
                 for(let u of user_arr){
                     //This presumes they will only have one dunbar role here.  Make sure getAllUsers() accounts for that.
@@ -69,8 +69,8 @@ if(sessionStorage.getItem("Dunbar-Login-Token")){
             }
             else{
                 //TODO Then they are not an admin, but can view their profile page
-                // sessionStorage.removeItem('Agent-URI')
-                // sessionStorage.removeItem('Dunbar-Login-Token')
+                // localStorage.removeItem('Agent-URI')
+                // localStorage.removeItem('Dunbar-Login-Token')
                 stopHeartbeat()
                 alert("You do not have proper permissions to manage the Dunbar Apps' Users.  You will be sent to your profile.")
                 window.location="profile.html"
@@ -91,7 +91,7 @@ async function assignRole(userid, role){
         method: 'GET', 
         cache: 'default',
         headers: {
-          'Authorization': `Bearer ${sessionStorage.getItem("Dunbar-Login-Token")}`,
+          'Authorization': `Bearer ${localStorage.getItem("Dunbar-Login-Token")}`,
           'Content-Type' : "application/json; charset=utf-8"
         }
     })
@@ -125,7 +125,7 @@ async function getAllUsers(){
         "method" : "GET",
         "cache" : "no-store",
         "headers" :{
-            "Authorization" : `Bearer ${sessionStorage.getItem("Dunbar-Login-Token")}`
+            "Authorization" : `Bearer ${localStorage.getItem("Dunbar-Login-Token")}`
         }
     })
     .then(resp => resp.json())

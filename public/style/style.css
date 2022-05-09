@@ -36,36 +36,8 @@ h1 {
     color: gray;
 }
 
-.info{
-    display:  inline-block;
-}
-
-.info.username{
-    margin-right: 10px;
-}
-
-.info.role{
-    text-transform: uppercase;
-}
-
-.roleBtn{
-    background-color: white;
-    color: #2F353E;
-    padding: 6px;
-    font-weight: bold;
-    border-radius: 20px;
-}
-
-.roleBtn:hover{
-    background-color: #2F353E;
-    color: white;
-    padding: 6px;
-    font-weight: bold;
-    border-radius: 20px;
-}
-
-#userList li{
-    padding: 5px 0px;
+.role{
+    text-transform: capitalize;
 }
 
 .no-break {

@@ -28,12 +28,12 @@ let webAuth = new auth0.WebAuth({
 let manager = {}
 
 //You can trust the token.  However, it may have expired.
-if(sessionStorage.getItem("Dunbar-Login-Token")){
+if(localStorage.getItem("Dunbar-Login-Token")){
     //An access token from login is stored. Let's use it to get THIS USER's info.  If it fails, the user needs to login again.
-    authenticator.userInfo(sessionStorage.getItem("Dunbar-Login-Token"), async function(err, u){
+    authenticator.userInfo(localStorage.getItem("Dunbar-Login-Token"), async function(err, u){
         if(err){
             console.error(err)
-            sessionStorage.removeItem('Dunbar-Login-Token')
+            localStorage.removeItem('Dunbar-Login-Token')
             alert("You logged out or your session expired.  Try logging in again.")
             stopHeartbeat()
             window.location="login.html"
@@ -42,7 +42,7 @@ if(sessionStorage.getItem("Dunbar-Login-Token")){
             startHeartbeat(webAuth)
             manager = new auth0.Management({
               domain: DOMAIN,
-              token: sessionStorage.getItem("Dunbar-Login-Token")
+              token: localStorage.getItem("Dunbar-Login-Token")
             })
             userName.innerHTML = u.name ?? u.nickname ?? u.email
             //Populate know information into the form inputs.
@@ -112,7 +112,7 @@ async function updateUserInfo(event, userid){
             method: 'PUT', 
             cache: 'default',
             headers: {
-              'Authorization': `Bearer ${sessionStorage.getItem("Dunbar-Login-Token")}`,
+              'Authorization': `Bearer ${localStorage.getItem("Dunbar-Login-Token")}`,
               'Content-Type' : "application/json; charset=utf-8"
             },
             body:JSON.stringify(data)

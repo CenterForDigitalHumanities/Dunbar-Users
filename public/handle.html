@@ -16,10 +16,10 @@
             let state = getURLHash("state")
             let currentHash = location.hash
             //Whats do you want to do if app_redirect is not present?  We would be stuck on this page and not know what app to go to with the token.
-            if(sessionStorage.getItem(state)){
-                let json = JSON.parse(sessionStorage.getItem(state))
+            if(localStorage.getItem(state)){
+                let json = JSON.parse(localStorage.getItem(state))
                 let redirect = json.redirectURL
-                sessionStorage.removeItem(state)
+                localStorage.removeItem(state)
                 document.location.href = redirect + currentHash
             }
         }

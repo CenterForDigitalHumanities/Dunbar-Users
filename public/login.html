@@ -1,11 +1,14 @@
 <!DOCTYPE html>
 <html lang="en-us">
-
+    
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <title>Dunbar Users Portal</title>
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <link rel="stylesheet" href="./style/style.css">
+        <link rel="stylesheet" href="./style/style.css">        
+        <script src="https://cdn.auth0.com/js/auth0/9.19.0/auth0.min.js"></script>
+        <script src="./script/heartbeat.js" type="text/javascript" defer></script>
+        <script src="./script/manage.js" type="text/javascript" defer></script>
     </head>
     <body>
         <header class="container">
@@ -43,56 +46,5 @@
                     value="Login To Dunbar User Management" />
             </div>
         </div>
-        <script src="https://cdn.auth0.com/js/auth0/9.19.0/auth0.min.js"></script>
-        <script type="text/javascript">
-            const AUDIENCE = "https://cubap.auth0.com/api/v2/"
-            const CLIENTID = "z1DuwzGPYKmF7POW9LiAipO5MvKSDERM"
-            const DUNBAR_REDIRECT = origin+"/manage.html"
-            const DOMAIN = "cubap.auth0.com"
-            let webAuth = null
-            //This is an Auth0 Bearer, a management access token
-            let token = sessionStorage.getItem("Dunbar-Login-Token")
-            //This is a RERUM v1 Agent
-            if(token){
-                let authenticator = new auth0.Authentication({
-                    domain:       DOMAIN,
-                    clientID:     CLIENTID
-                })
-                //An access token is stored. Let's use it to get THIS USER's info.  If it fails, the user needs to login again.
-                authenticator.userInfo(token, function(err, u){
-                    if(err){
-                        alert("Your session may have expired.  Please login again.")
-                    }
-                    else{
-                        window.location="manage.html"
-                    }
-                })
-            }
-            else{
-                //They need to log in!
-                alert("Your session may have expired.  Please login again.")
-            }
-
-            /**
-             *  When they click login send them off the Auth0 Universal Login.
-             *  This app back end needs access token level scope for managing other users in user management.
-             *  For non-admins, some of the front end needs ID token level scope for managing the current user.
-             *  This is covered by using both token types in responseType.
-             */  
-            login.onclick = ev => {
-                webAuth = new auth0.WebAuth({
-                    "domain":       DOMAIN,
-                    "clientID":     CLIENTID,
-                    "audience":   AUDIENCE
-                })
-                webAuth.authorize({
-                    "authParamsMap": {'app': 'dla'},
-                    "scope":"read:roles update:current_user_metadata read:current_user name nickname picture email profile openid offline_access",
-                    "redirectUri": DUNBAR_REDIRECT,
-                    "responseType" : "id_token token"
-                })
-            }
-        </script>
     </body>
-
 </html>
