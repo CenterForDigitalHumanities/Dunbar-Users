@@ -9,12 +9,11 @@
 login_beat = null
 function startHeartbeat(webAuth){
     login_beat = setInterval(async function(){
-        if(sessionStorage.getItem("Dunbar-Login-Token")){
-            authenticator.userInfo(sessionStorage.getItem("Dunbar-Login-Token"), async function(err1, u){
+        if(localStorage.getItem("Dunbar-Login-Token")){
+            authenticator.userInfo(localStorage.getItem("Dunbar-Login-Token"), async function(err1, u){
                 if(err1){
                     console.error(err1)
-                    sessionStorage.removeItem('Dunbar-Login-Token')
-                    stopHeartbeat()
+                    localStorage.removeItem('Dunbar-Login-Token')
                     alert("You logged out of Dunbar Apps or your session expired.  Try logging in again.")
                     stopHeartbeat()
                     window.location = "login.html"
@@ -24,12 +23,12 @@ function startHeartbeat(webAuth){
                         if(err2) {
                             console.error("Could not get new login token, checkSession() failure.  You need to login again.")
                             console.error(err2)
-                            sessionStorage.removeItem('Dunbar-Login-Token')
+                            localStorage.removeItem('Dunbar-Login-Token')
                             stopHeartbeat()
                             window.location = "login.html"
                         }
                         else{
-                            sessionStorage.setItem("Dunbar-Login-Token", result.accessToken)
+                            localStorage.setItem("Dunbar-Login-Token", result.accessToken)
                         }
                     })
                 }
@@ -37,7 +36,6 @@ function startHeartbeat(webAuth){
         }
         else{
             console.error("There is no login token for the heartbeat.  Login plz")
-            stopHeartbeat()
             window.location = "login.html"
             //You need to login to start a session!
         }

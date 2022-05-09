@@ -45,7 +45,7 @@
             const DOMAIN = "cubap.auth0.com"
             let webAuth = null
             //This is an Auth0 Bearer, a management access token
-            let token = sessionStorage.getItem("Dunbar-Login-Token")
+            let token = localStorage.getItem("Dunbar-Login-Token")
             //This is a RERUM v1 Agent
             if(token){
                 let authenticator = new auth0.Authentication({

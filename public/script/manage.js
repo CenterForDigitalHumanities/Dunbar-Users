@@ -39,15 +39,14 @@ let webAuth = new auth0.WebAuth({
  * Admins can change other users' roles.
  */ 
 if(myURL.indexOf("access_token=") > -1){
-    sessionStorage.setItem('Dunbar-Login-Token', getURLHash("access_token"))
+    localStorage.setItem('Dunbar-Login-Token', getURLHash("access_token"))
 }
-if(sessionStorage.getItem("Dunbar-Login-Token")){
-    authenticator.userInfo(sessionStorage.getItem("Dunbar-Login-Token"), async function(err, u){
+if(localStorage.getItem("Dunbar-Login-Token")){
+    authenticator.userInfo(localStorage.getItem("Dunbar-Login-Token"), async function(err, u){
         if(err){
             console.error(err)
-            sessionStorage.removeItem('Dunbar-Login-Token')
+            localStorage.removeItem('Dunbar-Login-Token')
             alert("You logged out of Dunbar Apps or your session expired.  Try logging in again.")
-            stopHeartbeat()
             window.location = "login.html"
         }
         else{
@@ -80,7 +79,6 @@ if(sessionStorage.getItem("Dunbar-Login-Token")){
             }
             else{
                 //Then they are not an admin, but can view their profile page
-                stopHeartbeat()
                 alert("You do not have proper permissions to manage the Dunbar Apps' Users.  You will be sent to your profile.")
                 window.location="profile.html"
             }
@@ -92,7 +90,6 @@ if(sessionStorage.getItem("Dunbar-Login-Token")){
 else{
     //They need to log in!
     alert("You logged out of Dunbar Apps or your session expired.  Try logging in again.")
-    stopHeartbeat()
     window.location="login.html"
 }
 
@@ -112,7 +109,7 @@ async function assignRole(userid, role){
         method: 'GET', 
         cache: 'default',
         headers: {
-          'Authorization': `Bearer ${sessionStorage.getItem("Dunbar-Login-Token")}`,
+          'Authorization': `Bearer ${localStorage.getItem("Dunbar-Login-Token")}`,
           'Content-Type' : "application/json; charset=utf-8"
         }
     })
@@ -152,7 +149,7 @@ async function getAllUsers(){
         "method" : "GET",
         "cache" : "no-store",
         "headers" :{
-            "Authorization" : `Bearer ${sessionStorage.getItem("Dunbar-Login-Token")}`
+            "Authorization" : `Bearer ${localStorage.getItem("Dunbar-Login-Token")}`
         }
     })
     .then(resp => resp.json())
