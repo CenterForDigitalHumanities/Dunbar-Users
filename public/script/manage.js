@@ -9,31 +9,44 @@ const DUNBAR_PUBLIC_ROLE = "dunbar_user_public"
 const DUNBAR_CONTRIBUTOR_ROLE = "dunbar_user_contributor"
 const DUNBAR_ADMIN_ROLE = "dunbar_user_admin"
 const myURL = document.location.href
+
+/**
+ * Solely for getting the user profile.
+ */ 
 let authenticator = new auth0.Authentication({
     "domain":     DOMAIN,
     "clientID":   CLIENTID,
-    "scope":"read:roles update:current_user_metadata name nickname picture email profile openid offline_access"
+    "scope":"read:roles update:current_user_metadata read:current_user name nickname picture email profile openid offline_access"
 })
+
+/**
+ * This is for the heartbeat.
+ */ 
 let webAuth = new auth0.WebAuth({
     "domain":       DOMAIN,
     "clientID":     CLIENTID,
     "audience":   AUDIENCE,
     "responseType" : "id_token token",
     "redirectUri" : DUNBAR_REDIRECT,
-    "scope":"read:roles update:current_user_metadata name nickname picture email profile openid offline_access",
+    "scope":"read:roles update:current_user_metadata read:current_user name nickname picture email profile openid offline_access",
 })
+
+/**
+ * You can trust the token.  However, it may have expired.
+ * It is an access token from an authorize flow.
+ * Use it to get the user profile (which also checks that you are logged in with a session)
+ * If this is a Dunbar Apps user and they are an admin, show them the Dunbar Apps users.
+ * Admins can change other users' roles.
+ */ 
 if(myURL.indexOf("access_token=") > -1){
     sessionStorage.setItem('Dunbar-Login-Token', getURLHash("access_token"))
 }
-//You can trust the token.  However, it may have expired.
 if(sessionStorage.getItem("Dunbar-Login-Token")){
-    //A token was in sessionStorage, so there was a login during this window session.
-    //An access token from login is stored. Let's use it to get THIS USER's info.  If it fails, the user needs to login again.
     authenticator.userInfo(sessionStorage.getItem("Dunbar-Login-Token"), async function(err, u){
         if(err){
             console.error(err)
             sessionStorage.removeItem('Dunbar-Login-Token')
-            alert("You logged out or your session expired.  Try logging in again.")
+            alert("You logged out of Dunbar Apps or your session expired.  Try logging in again.")
             stopHeartbeat()
             window.location = "login.html"
         }
@@ -73,15 +86,23 @@ if(sessionStorage.getItem("Dunbar-Login-Token")){
             }
         }
     })
+    //Get the junk out of the address bar.
     history.replaceState(null, null, ' ');
 }
 else{
     //They need to log in!
-    alert("You logged out or your session expired.  Try logging in again.")
+    alert("You logged out of Dunbar Apps or your session expired.  Try logging in again.")
     stopHeartbeat()
     window.location="login.html"
 }
 
+/**
+ * Assign the given userid a new role.
+ * This calls out to the Dunbar Users back end.  You must be an admin.
+ * You must supply your login token in the Authorization header.
+ * 
+ * Each role assignment has its own GET endpoint, like /manage/assignPublicRole/{userid}
+ */ 
 async function assignRole(userid, role){
     let url = `/dunbar-users/manage/assign${role}Role/${userid}`
     document.querySelectorAll(`.role[userid="${userid}"]`).forEach(elem => {
@@ -143,6 +164,9 @@ async function getAllUsers(){
     return users
 }
 
+/**
+ *  Given a user profile, check if that user is a Dunbar Apps admin.
+ */  
 function isAdmin(user){
     let roles = user[DUNBAR_USER_ROLES_CLAIM].roles ?? []
     return roles.includes(DUNBAR_ADMIN_ROLE)

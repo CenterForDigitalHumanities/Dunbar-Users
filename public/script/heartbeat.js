@@ -15,7 +15,7 @@ function startHeartbeat(webAuth){
                     console.error(err1)
                     sessionStorage.removeItem('Dunbar-Login-Token')
                     stopHeartbeat()
-                    alert("You logged out or your session expired.  Try logging in again.")
+                    alert("You logged out of Dunbar Apps or your session expired.  Try logging in again.")
                     stopHeartbeat()
                     window.location = "login.html"
                 }

@@ -8,43 +8,47 @@ const DUNBAR_USER_ROLES_CLAIM = "http://dunbar.rerum.io/user_roles"
 const DUNBAR_PUBLIC_ROLE = "dunbar_user_public"
 const DUNBAR_CONTRIBUTOR_ROLE = "dunbar_user_contributor"
 const DUNBAR_ADMIN_ROLE = "dunbar_user_admin"
-const myURL = window.location
-let token = sessionStorage.getItem("Dunbar-Login-Token")
+const myURL = document.location.href
 
+/**
+ * Solely for getting the user profile.
+ */ 
 let authenticator = new auth0.Authentication({
     "domain":     DOMAIN,
     "clientID":   CLIENTID,
-    "scope":"read:roles update:current_user_metadata name nickname picture email profile openid offline_access"
+    "scope":"read:roles update:current_user_metadata read:current_user name nickname picture email profile openid offline_access"
 })
 
+/**
+ * This is for the heartbeat.
+ */ 
 let webAuth = new auth0.WebAuth({
     "domain":       DOMAIN,
     "clientID":     CLIENTID,
     "audience":   AUDIENCE,
     "responseType" : "id_token token",
     "redirectUri" : DUNBAR_REDIRECT,
-    "scope":"read:roles update:current_user_metadata name nickname picture email profile openid offline_access"
+    "scope":"read:roles update:current_user_metadata read:current_user name nickname picture email profile openid offline_access"
 })
 
-let manager = {}
-
-//You can trust the token.  However, it may have expired.
+/**
+ * You can trust the token.  However, it may have expired.
+ * It is an access token from an authorize flow.
+ * Use it to get the user profile (which also checks that you are logged in with a session)
+ * If this is a Dunbar Apps user, then they will be able to update their own profile information.
+ */ 
 if(sessionStorage.getItem("Dunbar-Login-Token")){
     //An access token from login is stored. Let's use it to get THIS USER's info.  If it fails, the user needs to login again.
     authenticator.userInfo(sessionStorage.getItem("Dunbar-Login-Token"), async function(err, u){
         if(err){
             console.error(err)
             sessionStorage.removeItem('Dunbar-Login-Token')
-            alert("You logged out or your session expired.  Try logging in again.")
+            alert("You logged out of Dunbar Apps or your session expired.  Try logging in again.")
             stopHeartbeat()
             window.location="login.html"
         }
         else{
             startHeartbeat(webAuth)
-            manager = new auth0.Management({
-              domain: DOMAIN,
-              token: sessionStorage.getItem("Dunbar-Login-Token")
-            })
             userName.innerHTML = u.name ?? u.nickname ?? u.email
             //Populate know information into the form inputs.
             for(let prop in u){
@@ -62,42 +66,20 @@ if(sessionStorage.getItem("Dunbar-Login-Token")){
 }
 else{
     //They need to log in!
-    alert("You logged out or your session expired.  Try logging in again.")
+    alert("You logged out of Dunbar Apps or your session expired.  Try logging in again.")
     stopHeartbeat()
     window.location="login.html"
 }
 
 /**
- * ALLOWED FIELDS
-    app_metadata
-    blocked
-    email
-    email_verified
-    family_name
-    given_name
-    name
-    nickname
-    password
-    phone_number
-    phone_verified
-    picture
-    username
-    user_metadata
-    verify_email
- * OUR SCOPES
-    update:current_user_metadata 
-    name
-    nickname
-    username
-    picture
-    email
-    profile
-    openid
-    offline_access
+ * PUT to the dunbar-users back end.
+ * You must supply your login token in the Authorization header.
+ * The body needs to be a user object, and you need to supply the user id in the body.
+ * You can only update the user info belonging to the user encoded on the token in the Authorization header
+ * This means you can only do this to update "your own" profile information.
  */ 
 async function updateUserInfo(event, userid){
     event.preventDefault()
-    let params = { id: userid }    
     let info = new FormData(event.target)
     let data = Object.fromEntries(info.entries())
     for(let prop in data){
@@ -105,15 +87,28 @@ async function updateUserInfo(event, userid){
             delete data[prop]
         }
     }
-    manager.patchUserAttributes(userid, data, (err, user) => {
-        if(err){
-            console.error("Update Failed!")
+    data.user_id = userid
+    if(confirm("Really submit these profile changes?")){
+        let updatedUser = await fetch("/dunbar-users/manage/updateProfileInfo",{
+            method: 'PUT', 
+            cache: 'default',
+            headers: {
+              'Authorization': `Bearer ${sessionStorage.getItem("Dunbar-Login-Token")}`,
+              'Content-Type' : "application/json; charset=utf-8"
+            },
+            body:JSON.stringify(data)
+        })
+        .then(r => r.json())
+        .catch(err => {
+            console.error("User Not Updated")
             console.error(err)
+            return {}
+        })    
+        if(updatedUser.user_id){
+            alert("User Info Updated!")
         }
         else{
-            console.log("User Updated!")
-            console.log(user)        
+            alert("User Info Update Failed!")
         }
-        
-    })
+    }
 }
