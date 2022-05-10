@@ -28,7 +28,6 @@
             const CLIENTID = "z1DuwzGPYKmF7POW9LiAipO5MvKSDERM"
             const redirect = origin+"/dunbar-users/login.html"
             localStorage.removeItem('Dunbar-Login-Token')
-            localStorage.removeItem('Dunbar-Login-Token')
             document.cookie = "Dunbar-Login-Token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;"
             stopHeartbeat()
             let webAuth = new auth0.WebAuth({
@@ -37,7 +36,7 @@
             })
             webAuth.logout({
                 returnTo: redirect,
-                client_id: CLIENTID
+                clientID: CLIENTID
             })    
         }
         else{

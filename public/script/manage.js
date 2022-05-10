@@ -9,6 +9,10 @@ const DUNBAR_PUBLIC_ROLE = "dunbar_user_public"
 const DUNBAR_CONTRIBUTOR_ROLE = "dunbar_user_contributor"
 const DUNBAR_ADMIN_ROLE = "dunbar_user_admin"
 const myURL = document.location.href
+
+/**
+ * Solely for getting the user profile.
+ */ 
 let authenticator = new auth0.Authentication({
     "domain": DOMAIN,
     "clientID": CLIENTID,

@@ -10,17 +10,23 @@ const DUNBAR_CONTRIBUTOR_ROLE = "dunbar_user_contributor"
 const DUNBAR_ADMIN_ROLE = "dunbar_user_admin"
 const myURL = document.location.href
 
+/**
+ * Solely for getting the user profile.
+ */ 
 let authenticator = new auth0.Authentication({
     "domain":     DOMAIN,
     "clientID":   CLIENTID,
     "scope":"read:roles update:current_user_metadata read:current_user name nickname picture email profile openid offline_access"
 })
 
+/**
+ * This is for the heartbeat.
+ */ 
 let webAuth = new auth0.WebAuth({
     "domain":       DOMAIN,
     "clientID":     CLIENTID,
     "audience":   AUDIENCE,
-    "responseType" : "token",
+    "responseType" : "id_token token",
     "redirectUri" : DUNBAR_REDIRECT,
     "scope":"read:roles update:current_user_metadata read:current_user name nickname picture email profile openid offline_access"
 })
@@ -34,9 +40,8 @@ if(localStorage.getItem("Dunbar-Login-Token")){
         if(err){
             console.error(err)
             localStorage.removeItem('Dunbar-Login-Token')
-            alert("You logged out or your session expired.  Try logging in again.")
+            alert("You logged out of Dunbar Apps or your session expired.  Try logging in again.")
             stopHeartbeat()
-            window.location="login.html"
         }
         else{
             startHeartbeat(webAuth)
@@ -62,41 +67,17 @@ if(localStorage.getItem("Dunbar-Login-Token")){
 }
 else{
     //They need to log in!
-    alert("You logged out or your session expired.  Try logging in again.")
-    stopHeartbeat()
+    alert("You logged out of Dunbar Apps or your session expired.  Try logging in again.")
     window.location="login.html"
 }
 
 /**
- * ALLOWED FIELDS
-    app_metadata
-    blocked
-    email
-    email_verified
-    family_name
-    given_name
-    name
-    nickname
-    password
-    phone_number
-    phone_verified
-    picture
-    username
-    user_metadata
-    verify_email
- * OUR SCOPES
-    update:current_user_metadata 
-    name
-    nickname
-    username
-    picture
-    email
-    profile
-    openid
-    offline_access
+ * PUT to the dunbar-users back end.
+ * You must supply your login token in the Authorization header.
+ * The body needs to be a user object, and you need to supply the user id in the body.
+ * You can only update the user info belonging to the user encoded on the token in the Authorization header
+ * This means you can only do this to update "your own" profile information.
  */ 
-
-/*
 async function updateUserInfo(event, userid){
     event.preventDefault()
     let info = new FormData(event.target)
@@ -123,7 +104,7 @@ async function updateUserInfo(event, userid){
             console.error(err)
             return {}
         })    
-        if(updateUser.user_id){
+        if(updatedUser.user_id){
             alert("User Info Updated!")
         }
         else{
