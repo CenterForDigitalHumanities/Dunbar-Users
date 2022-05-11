@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="./style/style.css">
     <script src="https://cdn.auth0.com/js/auth0/9.19.0/auth0.min.js" defer></script>
     <script src="./script/heartbeat.js" type="text/javascript" defer></script>
-    <script src="./script/profile.js" type="text/javascript" defer></script>
+    <script src="./script/manage.js" type="text/javascript" defer></script>
 </head>
 
 <body>
@@ -19,12 +19,15 @@
                 <a class="brand" href="login.html"><img
                         src="https://cdm16007.contentdm.oclc.org/iiif/2/p267401coll32:4553/100,0,1100,1100/150,150/0/default.jpg"
                         alt="logo"></a>
-                <h1 class="brand text-light">
+                <h1 class="brand text-light hide-sm hide-xs">
                     Dunbar Library &amp; Archive Users&nbsp;
                     <i class="fa fa-cubes"></i>
                 </h1>
             </div>
-            <div class="nav-right">
+            <div class="nav-right tabs">
+                <a id="username" href="profile.html" class="bg-light active">Profile</a>
+                <a href="manage.html" class="bg-light">Users</a>
+                <a href="logout.html" class="bg-light">Logout</a>
             </div>
         </nav>
     </header>

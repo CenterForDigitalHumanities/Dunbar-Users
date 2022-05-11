@@ -19,17 +19,24 @@ function stopHeartbeat() {
 }
 
 async function heartbeat(webAuth) {
-    webAuth.checkSession({}, (err2, result) => {
-        if (err2) {
-            console.error(err2)
-            localStorage.removeItem('Dunbar-Login-Token')
-            stopHeartbeat()
-            webAuth.authorize({ authParamsMap: { 'app': 'dla' } })
-            return
-        }
-        localStorage.setItem("Dunbar-Login-Token", result.accessToken)
-        localStorage.setItem("userToken", result.idToken)
-        window.DLA_USER = result.idTokenPayload
-        window.DLA_USER.authorization = result.accessToken
-    })
+    try {
+        webAuth.checkSession({}, (err2, result) => {
+            if (err2) {
+                console.error(err2)
+                localStorage.removeItem('Dunbar-Login-Token')
+                stopHeartbeat()
+                webAuth.authorize({ authParamsMap: { 'app': 'dla' } })
+                return
+            }
+            localStorage.setItem("Dunbar-Login-Token", result.accessToken)
+            localStorage.setItem("userToken", result.idToken)
+            if(username){
+                username.innerHTML = u.name ?? u.nickname ?? u.email
+            }
+            window.DLA_USER = result.idTokenPayload
+            window.DLA_USER.authorization = result.accessToken
+        })
+    } catch(_err){
+        // auth0 err
+    }
 }
