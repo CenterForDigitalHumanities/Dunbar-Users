@@ -13,6 +13,7 @@ function startHeartbeat(webAuth) {
 }
 
 function stopHeartbeat() {
+    delete window.DLA_USER
     if (login_beat != undefined) {
         clearInterval(login_beat)
     }
@@ -20,23 +21,18 @@ function stopHeartbeat() {
 
 async function heartbeat(webAuth) {
     try {
-        webAuth.checkSession({}, (err2, result) => {
+        return await webAuth.checkSession({}, (err2, result) => {
             if (err2) {
                 console.error(err2)
-                localStorage.removeItem('Dunbar-Login-Token')
                 stopHeartbeat()
                 webAuth.authorize({ authParamsMap: { 'app': 'dla' } })
-                return
             }
-            localStorage.setItem("Dunbar-Login-Token", result.accessToken)
             localStorage.setItem("userToken", result.idToken)
-            if(username){
-                username.innerHTML = u.name ?? u.nickname ?? u.email
-            }
             window.DLA_USER = result.idTokenPayload
             window.DLA_USER.authorization = result.accessToken
         })
-    } catch(_err){
+    } catch (_err) {
         // auth0 err
+        return "erroring"
     }
 }

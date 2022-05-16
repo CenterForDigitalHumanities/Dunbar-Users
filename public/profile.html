@@ -7,16 +7,16 @@
     <title>Dunbar Profile Management</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="./style/style.css">
-    <script src="https://cdn.auth0.com/js/auth0/9.19.0/auth0.min.js" defer></script>
-    <script src="./script/heartbeat.js" type="text/javascript" defer></script>
-    <script src="./script/manage.js" type="text/javascript" defer></script>
+    <!-- <script src="https://cdn.auth0.com/js/auth0/9.19.0/auth0.min.js" defer></script>
+    <script src="./script/heartbeat.js" type="text/javascript" defer></script> -->
+    <script src="./script/manage.js" type="module"></script>
 </head>
 
 <body>
     <header class="container">
         <nav class="nav">
             <div class="nav-left">
-                <a class="brand" href="login.html"><img
+                <a class="brand" href="profile.html"><img
                         src="https://cdm16007.contentdm.oclc.org/iiif/2/p267401coll32:4553/100,0,1100,1100/150,150/0/default.jpg"
                         alt="logo"></a>
                 <h1 class="brand text-light hide-sm hide-xs">
@@ -27,7 +27,7 @@
             <div class="nav-right tabs">
                 <a id="username" href="profile.html" class="bg-light active">Profile</a>
                 <a href="manage.html" class="bg-light">Users</a>
-                <a href="logout.html" class="bg-light">Logout</a>
+                <button href="profile.html" class="bg-light" is="auth-button">Logout</button>
             </div>
         </nav>
     </header>
@@ -58,9 +58,6 @@
             </form>
             <div class="card col is-center">
                 <p>
-                    <em>
-                        Logged in as <span id="userName" class="no-break">Not Logged In</span>
-                    </em> 
                     <a class="button default" href="./logout.html">Logout</a>
                 </p>
                 <figure>
