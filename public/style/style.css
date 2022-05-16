@@ -1,32 +1,29 @@
+@import "https://unpkg.com/chota@latest";
+@import "https://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css";
+
 #msg {
     color: green;
     font-weight: bold;
 }
 
-#intro {
-    color: #979A9E;
-    font-size: 12pt;
-}
-
-#userForm{
-    width: fit-content;
-    border: 2px solid black;
-    padding: 10px;
-}
-
 body {
     font-family: 'Open Sans', sans-serif;
-    color: #979A9E;
     background-color: #2F353E;
 }
 
-input[type="text"] {
-    background-color: #ccc;
-    color: black;
-    font-weight: bold;
-    font-family: serif;
-    font-size: 14pt;
+span[data-username]::after{
+    content: attr(data-username);
 }
+span[data-nickname]::after{
+    content: attr(data-nickname);
+}
+span[data-email]::after{
+    content: attr(data-email);
+}
+span[data-avatar]::after{
+    content: attr(data-avatar);
+}
+
 
 h1 {
     cursor: pointer;
@@ -35,77 +32,14 @@ h1 {
     margin-bottom: 10px;
 }
 
-.navbar-brand {
-    float: none;
-    font-size: 2rem;
-    line-height: 1.5;
-    margin-bottom: 20px;
-}
-
-.panel-body {
-    color: initial;
-}
-
-.panel {
-    word-break: break-word;
-}
-
 .status_header {
     color: gray;
 }
 
-.info{
-    display:  inline-block;
+.role{
+    text-transform: capitalize;
 }
 
-.info.username{
-    margin-right: 10px;
-}
-
-.info.role{
-    text-transform: uppercase;
-}
-
-.submitBtnPadding{
-    padding: 11px 1px 5px 112px;
-}
-
-.submitBtn{
-    background-color: white;
-    color: #2F353E;
-    padding: 6px;
-    font-weight: bold;
-    border-radius: 20px;
-}
-
-.submitBtn:hover{
-    background-color: #2F353E;
-    color: white;
-    padding: 6px;
-    font-weight: bold;
-    border-radius: 20px;
-}
-
-.roleBtn{
-    background-color: white;
-    color: #2F353E;
-    padding: 6px;
-    font-weight: bold;
-    border-radius: 20px;
-}
-
-.roleBtn:hover{
-    background-color: #2F353E;
-    color: white;
-    padding: 6px;
-    font-weight: bold;
-    border-radius: 20px;
-}
-
-.who{
-    font-weight:  bold;
-}
-
-#userList li{
-    padding: 5px 0px;
+.no-break {
+    white-space: nowrap;
 }

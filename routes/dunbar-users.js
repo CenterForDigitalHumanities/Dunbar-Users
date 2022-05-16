@@ -12,7 +12,7 @@ router.use('/manage', managementRouter)
 
 /* GET home page.  Redirect to login */
 router.get('/', function(req, res, next) {
-  res.redirect(301, 'login.html')
+  res.redirect(301, 'profile.html')
 })
 
 module.exports = router

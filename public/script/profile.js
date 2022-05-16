@@ -37,18 +37,17 @@ let webAuth = new auth0.WebAuth({
  * Use it to get the user profile (which also checks that you are logged in with a session)
  * If this is a Dunbar Apps user, then they will be able to update their own profile information.
  */ 
-if(localStorage.getItem("Dunbar-Login-Token")){
+if(window.DLA_USER?.authorization){
     //An access token from login is stored. Let's use it to get THIS USER's info.  If it fails, the user needs to login again.
-    authenticator.userInfo(localStorage.getItem("Dunbar-Login-Token"), async function(err, u){
+    authenticator.userInfo(window.DLA_USER?.authorization, async function(err, u){
         if(err){
             console.error(err)
-            localStorage.removeItem('Dunbar-Login-Token')
             alert("You logged out of Dunbar Apps or your session expired.  Try logging in again.")
-            window.location="login.html"
+            window.location="profile.html"
         }
         else{
             startHeartbeat(webAuth)
-            userName.innerHTML = u.name ?? u.nickname ?? u.email
+            username.innerHTML = u.name ?? u.nickname ?? u.email
             //Populate know information into the form inputs.
             for(let prop in u){
                 let textfield = document.querySelector(`input[name='${prop}']`)
@@ -66,7 +65,7 @@ if(localStorage.getItem("Dunbar-Login-Token")){
 else{
     //They need to log in!
     alert("You logged out of Dunbar Apps or your session expired.  Try logging in again.")
-    window.location="login.html"
+    window.location="profile.html"
 }
 
 /**
@@ -91,7 +90,7 @@ async function updateUserInfo(event, userid){
             method: 'PUT', 
             cache: 'default',
             headers: {
-              'Authorization': `Bearer ${localStorage.getItem("Dunbar-Login-Token")}`,
+              'Authorization': `Bearer ${window.DLA_USER?.authorization}`,
               'Content-Type' : "application/json; charset=utf-8"
             },
             body:JSON.stringify(data)
