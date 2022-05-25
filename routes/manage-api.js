@@ -81,12 +81,20 @@ router.get('/getAllUsers', async function (req, res, next) {
     authenticator.getProfile(token)
       .then(async (current_dunbar_users) => {
         if (isAdmin(current_dunbar_users)) {
+          //TODO* - Get all the users and filter out the ones that are for dunbar
+          /*
+          let filter = {
+            "q": `_exists_:app_metadata.app`
+          }
+          */
           let filter = {
             "q": `app_metadata.app:"dla"`
           }
           //FIXME I believe this is limited to 50 users at a time.
           //https://auth0.com/docs/manage-users/user-search/retrieve-users-with-get-users-endpoint#limitations
           let usersWithRoles = await manager.getUsers(filter)
+            // TODO*
+            //.then(allUsers => allUsers.filter(usr => usr.app_metadata.app.includes("dla")))
             .then(async (allUsers) => {
               return Promise.all(allUsers.map(async (u) => {
                 let roles = await manager.getUserRoles({ "id": u.user_id })
