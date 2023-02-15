@@ -15,10 +15,10 @@
 <body class="container">
     <p>
         This page will log you out of DLA.
-        <a target="_blank" href="/dunbar-users/login.html">Login here</a>.
+        <a target="_blank" href="/dunbar-users/profile.html">Login here</a>.
     </p>
     <script src="https://cdn.auth0.com/js/auth0/9.19.0/auth0.min.js"></script>
-    <script type="text/javascript" src="./script/heartbeat.js"></script>
+    <!-- <script type="text/javascript" src="./script/heartbeat.js"></script> -->
     <script type="text/javascript">
         /**
          * An HTML page instead of an endpoint to initiate a user log out of Dunbar Apps.
@@ -26,11 +26,9 @@
         if (confirm("Do you really want to log out?") === true) {
             const DOMAIN = "cubap.auth0.com"
             const CLIENTID = "z1DuwzGPYKmF7POW9LiAipO5MvKSDERM"
-            const redirect = "http://dunbar-users.herokuapp.com/dunbar-users/login.html"
-            localStorage.removeItem('Dunbar-Login-Token')
-            localStorage.removeItem('Dunbar-Login-Token')
+            const redirect = origin
             document.cookie = "Dunbar-Login-Token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;"
-            stopHeartbeat()
+            // stopHeartbeat()
             let webAuth = new auth0.WebAuth({
                 domain:       DOMAIN,
                 clientID:     CLIENTID
@@ -42,7 +40,7 @@
         }
         else{
             //login.html will route them to manage.html or profile.html.
-            window.location="manage.html"
+            window.location="profile.html"
         }
     </script>
 </body>

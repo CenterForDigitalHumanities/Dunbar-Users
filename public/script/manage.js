@@ -1,8 +1,10 @@
 #!/usr/bin/env node
+import AuthButton from 'https://centerfordigitalhumanities.github.io/DLA/auth.js'
+const auth = document.querySelector('[is="auth-button"]')
 
 const AUDIENCE = "https://cubap.auth0.com/api/v2/"
 const CLIENTID = "z1DuwzGPYKmF7POW9LiAipO5MvKSDERM"
-const DUNBAR_REDIRECT = "http://dunbar-users.herokuapp.com/dunbar-users/manage.html"
+const DUNBAR_REDIRECT = origin + "/manage.html"
 const DOMAIN = "cubap.auth0.com"
 const DUNBAR_USER_ROLES_CLAIM = "http://dunbar.rerum.io/user_roles"
 const DUNBAR_PUBLIC_ROLE = "dunbar_user_public"
@@ -12,159 +14,219 @@ const myURL = document.location.href
 
 /**
  * Solely for getting the user profile.
- */ 
+ */
 let authenticator = new auth0.Authentication({
-    "domain":     DOMAIN,
-    "clientID":   CLIENTID,
-    "scope":"read:roles update:current_user_metadata read:current_user name nickname picture email profile openid offline_access"
+    "domain": DOMAIN,
+    "clientID": CLIENTID,
+    "scope": "read:roles update:current_user_metadata read:current_user name nickname picture email profile openid offline_access"
 })
 
-/**
- * This is for the heartbeat.
- */ 
-let webAuth = new auth0.WebAuth({
-    "domain":       DOMAIN,
-    "clientID":     CLIENTID,
-    "audience":   AUDIENCE,
-    "responseType" : "id_token token",
-    "redirectUri" : DUNBAR_REDIRECT,
-    "scope":"read:roles update:current_user_metadata read:current_user name nickname picture email profile openid offline_access",
-})
-
-/**
- * You can trust the token.  However, it may have expired.
- * It is an access token from an authorize flow.
- * Use it to get the user profile (which also checks that you are logged in with a session)
- * If this is a Dunbar Apps user and they are an admin, show them the Dunbar Apps users.
- * Admins can change other users' roles.
- */ 
-if(myURL.indexOf("access_token=") > -1){
-    localStorage.setItem('Dunbar-Login-Token', getURLHash("access_token"))
-}
-if(localStorage.getItem("Dunbar-Login-Token")){
-    authenticator.userInfo(localStorage.getItem("Dunbar-Login-Token"), async function(err, u){
-        if(err){
-            console.error(err)
-            localStorage.removeItem('Dunbar-Login-Token')
-            alert("You logged out of Dunbar Apps or your session expired.  Try logging in again.")
-            window.location = "login.html"
+auth.addEventListener("dla-authenticated", ev => {
+    const ref = getReferringPage()
+    if (ref && ref.startsWith(location.href)) {
+        stopHeartbeat()
+        location.href = ref
+    }
+    if (window.username) {
+        username.innerHTML = ev.detail.name ?? ev.detail.nickname ?? ev.detail.email
+    }
+    if (location.pathname.includes("profile.html")) {
+        window.userForm?.addEventListener('submit', updateUserInfo)
+        //Populate know information into the form inputs.
+        for(let prop in ev.detail){
+            try{
+                document.querySelector(`input[name='${prop}']`)?.setAttribute('value',ev.detail[prop])
+                document.querySelector(`[data-${prop}]`)?.setAttribute(`data-${prop}`,ev.detail[prop])
+            } catch (err) {}
         }
-        else{
-            if(isAdmin(u)){
-                startHeartbeat(webAuth)
+        document.querySelector(`[data-picture]`).innerHTML = `<img src="${ev.detail.picture}"/>`
+    }
+    if (document.querySelector("[data-user='admin']")) {
+        adminOnly(ev.detail.authorization)
+    }
+})
+
+function adminOnly(token = window.DLA_USER?.authorization) {
+    //You can trust the token.  However, it may have expired.
+    //A token was in localStorage, so there was a login during this window session.
+    //An access token from login is stored. Let's use it to get THIS USER's info.  If it fails, the user needs to login again.
+    try {
+        authenticator.userInfo(token, async (err, _u) => {
+            if (err) {
+                auth.login({
+                    "authParamsMap": { 'app': 'dla' },
+                    "scope": "read:roles update:current_user_metadata read:current_user name nickname picture email profile openid offline_access",
+                    "redirectUri": DUNBAR_REDIRECT,
+                    "responseType": "id_token token"
+                })
+                return
+            }
+            if (isAdmin(_u)) {
                 userList.innerHTML = ""
-                userName.innerHTML = u.name ?? u.nickname ?? u.email
-                let user_arr = await getAllUsers()
-                for(let user of user_arr){
+                const user_arr = await getAllUsers()
+                let elem = ``
+                for (let user of user_arr) {
                     //This presumes they will only have one dunbar role here.  Make sure getAllUsers() accounts for that.
-                    let role = user[DUNBAR_USER_ROLES_CLAIM].roles[0] ?? "Role Not Assigned"
-                    role = role.replace("dunbar_user_", "")
-                    role = role.charAt(0).toUpperCase() + role.slice(1)
-                    //let elem = `<li user="${u.username}"><span class="info username">${user.username}</span>`
-                    let elem = `<li user="${u.name}"><span class="info username">${user.name}</span>`
-                    elem += `<span class="info role" userid="${user.user_id}"> : ${role}</span>`
-                    let buttons = `
-                        <div class="actions">
-                            <input class="small roleBtn" type="button" value="Make Public" onclick="assignRole('${user.user_id}', 'Public')"/>
-                            <input class="small roleBtn" type="button" value="Make Contributor" onclick="assignRole('${user.user_id}','Contributor')"/>
-                        </div>
-                    `
-                    if(role !== "Admin"){
-                        //Cannot demote an admin
-                        elem += buttons    
+                    const role = user[DUNBAR_USER_ROLES_CLAIM]?.roles[0]?.replace("dunbar_user_", "") ?? "Role Not Assigned"
+                    elem += `<li user="${_u.name}">${user.name}
+            <em class="role" userid="${user.user_id}"> : ${role}</em>`
+                    if (role !== "Admin") {
+                        elem += `<div class="actions">
+                        <input class="tag is-small "bg-primary" 
+                            type="button" 
+                            value="Make ${role === "public" ? "Contributor" : "Public"}" 
+                            onclick="assignRole('${user.user_id}','${role === "public" ? 'Contributor' : 'Public'}')"/>
+                    </div>`
                     }
-                    elem +=`</li>`
-                    userList.innerHTML += elem
-                }       
+                    elem += `</li>
+            `
+                }
+                userList.innerHTML += elem
             }
-            else{
-                //Then they are not an admin, but can view their profile page
-                alert("You do not have proper permissions to manage the Dunbar Apps' Users.  You will be sent to your profile.")
-                window.location="profile.html"
-            }
-        }
-    })
-    //Get the junk out of the address bar.
-    history.replaceState(null, null, ' ');
-}
-else{
-    //They need to log in!
-    alert("You logged out of Dunbar Apps or your session expired.  Try logging in again.")
-    window.location="login.html"
+        })
+    } catch (_err) {
+        //auth0 crashing error
+        auth.login({
+            "authParamsMap": { 'app': 'dla' },
+            "scope": "read:roles update:current_user_metadata read:current_user name nickname picture email profile openid offline_access",
+            "redirectUri": DUNBAR_REDIRECT,
+            "responseType": "id_token token"
+        })
+        return
+    }
+    history.replaceState(null, null, ' ')
 }
 
-/**
- * Assign the given userid a new role.
- * This calls out to the Dunbar Users back end.  You must be an admin.
- * You must supply your login token in the Authorization header.
- * 
- * Each role assignment has its own GET endpoint, like /manage/assignPublicRole/{userid}
- */ 
-async function assignRole(userid, role){
+async function assignRole(userid, role) {
     let url = `/dunbar-users/manage/assign${role}Role/${userid}`
     document.querySelectorAll(`.role[userid="${userid}"]`).forEach(elem => {
         elem.innerHTML = ` : Updating Role...`
     })
     fetch(url, {
-        method: 'GET', 
+        method: 'GET',
         cache: 'default',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem("Dunbar-Login-Token")}`,
-          'Content-Type' : "application/json; charset=utf-8"
+            'Authorization': `Bearer ${window.DLA_USER?.authorization}`,
+            'Content-Type': "application/json; charset=utf-8"
         }
     })
-    .then(resp => {
-        document.querySelectorAll(`.role[userid="${userid}"]`).forEach(elem => {
-            elem.innerHTML = ` : ${role}`
+        .then(_resp => {
+            document.querySelectorAll(`.role[userid="${userid}"]`).forEach(elem => {
+                elem.innerHTML = ` : ${role}`
+            })
         })
-    })
-    .catch(err => {
-        console.error("Role was not assigned")
-        console.error(err)
-        document.querySelectorAll(`.role[userid="${userid}"]`).forEach(elem => {
-            elem.innerHTML = ` : Error`
+        .catch(err => {
+            console.error("Role was not assigned")
+            console.error(err)
+            document.querySelectorAll(`.role[userid="${userid}"]`).forEach(elem => {
+                elem.innerHTML = ` : Error`
+            })
         })
-    })
+}
+
+/**
+ * PUT to the dunbar-users back end.
+ * You must supply your login token in the Authorization header.
+ * The body needs to be a user object, and you need to supply the user id in the body.
+ * You can only update the user info belonging to the user encoded on the token in the Authorization header
+ * This means you can only do this to update "your own" profile information.
+ */
+async function updateUserInfo(event, userid=window.DLA_USER?.sub) {
+    event.preventDefault()
+    let info = new FormData(event.target)
+    let data = Object.fromEntries(info.entries())
+    for (let prop in data) {
+        if (data[prop] === "" || data[prop] === null || data[prop] === undefined) {
+            delete data[prop]
+        }
+    }
+    data.user_id = userid
+        let updatedUser = await fetch("/dunbar-users/manage/updateProfileInfo", {
+            method: 'PUT',
+            cache: 'default',
+            headers: {
+                'Authorization': `Bearer ${window.DLA_USER?.authorization}`,
+                'Content-Type': "application/json; charset=utf-8"
+            },
+            body: JSON.stringify(data)
+        })
+            .then(r => r.json())
+            .catch(err => {
+                console.error("User Not Updated")
+                console.error(err)
+                return {}
+            })
+        if (updatedUser.user_id) {
+            alert("User Info Updated!")
+        }
+        else {
+            alert("User Info Update Failed!")
+        }
 }
 
 /**
  * Auth0 redirects here with a bunch of info in hash variables.
  * This function allows you pull a single variable from the hash
- */  
-function getURLHash(variable, url=document.location.href) {
-    var query = url.substr(url.indexOf("#")+1)
-    var vars = query.split("&")
-    for (var i = 0; i < vars.length; i++) {
-        var pair = vars[i].split("=")
-        if (pair[0] == variable) { return pair[1] }
-    }
-    return false
+ */
+function getURLHash(variable, urlString = document.location.href) {
+    const url = new URL(urlString)
+    var vars = new URLSearchParams(url.hash.substring(1))
+    return vars.get(variable) ?? false
 }
 
 /**
  * Use our Auth0 Server back end to ask for all the Dunbap Apps users.
- */ 
-async function getAllUsers(){
-     let users = await fetch("/dunbar-users/manage/getAllUsers", {
-        "method" : "GET",
-        "cache" : "no-store",
-        "headers" :{
-            "Authorization" : `Bearer ${localStorage.getItem("Dunbar-Login-Token")}`
+ */
+async function getAllUsers() {
+    return fetch("/dunbar-users/manage/getAllUsers", {
+        "method": "GET",
+        "cache": "no-store",
+        "headers": {
+            "Authorization": `Bearer ${window.DLA_USER?.authorization}`
         }
     })
-    .then(resp => resp.json())
-    .catch(err => {
-        console.error("Error getting Users!!")
-        console.error(err)
-        return []
-    })
-    return users
+        .then(resp => resp.json())
+        .catch(err => {
+            console.error("Error getting Users!!")
+            console.error(err)
+            return []
+        })
+}
+
+function isAdmin(user) {
+    return userHasRole(user, DUNBAR_ADMIN_ROLE)
+}
+/**
+ * Follows the 'base64url' rules to decode a string.
+ * @param {String} base64str from `state` parameter in the hash from Auth0
+ * @returns referring URL
+ */
+function b64toUrl(base64str) {
+    return window.atob(base64str.replace(/\-/g, "+").replace(/_/g, "/"))
+}
+/**
+ * Follows the 'base64url' rules to encode a string.
+ * @param {String} url from `window.location.href`
+ * @returns encoded string to pass as `state` to Auth0
+ */
+function urlToBase64(url) {
+    return window.btoa(url).replace(/\//g, "_").replace(/\+/g, "-").replace(/=+$/, "")
+}
+
+function getReferringPage() {
+    try {
+        return b64toUrl(location.hash.split("state=")[1].split("&")[0])
+    } catch (err) {
+        return false
+    }
 }
 
 /**
- *  Given a user profile, check if that user is a Dunbar Apps admin.
- */  
-function isAdmin(user){
-    let roles = user[DUNBAR_USER_ROLES_CLAIM].roles ?? []
-    return roles.includes(DUNBAR_ADMIN_ROLE)
+ * Checks array of stored roles for any of the roles provided.
+ * @param {Array} roles Strings of roles to check.
+ * @returns Boolean user has one of these roles.
+ */
+function userHasRole(user, roles) {
+    if (!Array.isArray(roles)) { roles = [roles] }
+    return Boolean(user?.[DUNBAR_USER_ROLES_CLAIM]?.roles.filter(r => roles.includes(r)).length)
 }
