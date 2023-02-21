@@ -33,11 +33,11 @@ auth.addEventListener("dla-authenticated", ev => {
     if (location.pathname.includes("profile.html")) {
         window.userForm?.addEventListener('submit', updateUserInfo)
         //Populate know information into the form inputs.
-        for(let prop in ev.detail){
-            try{
-                document.querySelector(`input[name='${prop}']`)?.setAttribute('value',ev.detail[prop])
-                document.querySelector(`[data-${prop}]`)?.setAttribute(`data-${prop}`,ev.detail[prop])
-            } catch (err) {}
+        for (let prop in ev.detail) {
+            try {
+                document.querySelector(`input[name='${prop}']`)?.setAttribute('value', ev.detail[prop])
+                document.querySelector(`[data-${prop}]`)?.setAttribute(`data-${prop}`, ev.detail[prop])
+            } catch (err) { }
         }
         document.querySelector(`[data-picture]`).innerHTML = `<img src="${ev.detail.picture}"/>`
     }
@@ -45,6 +45,8 @@ auth.addEventListener("dla-authenticated", ev => {
         adminOnly(ev.detail.authorization)
     }
 })
+
+const ROLES = ['public', 'contributor', 'reviewer', 'curator', 'admin']
 
 async function adminOnly(token = window.DLA_USER?.authorization) {
     //You can trust the token.  However, it may have expired.
@@ -55,18 +57,22 @@ async function adminOnly(token = window.DLA_USER?.authorization) {
             userList.innerHTML = ""
             const user_arr = await getAllUsers()
             let elem = ``
-            for (let user of user_arr) {
+            for (const [i,user] of user_arr.entries()) {
                 //This presumes they will only have one dunbar role here.  Make sure getAllUsers() accounts for that.
                 const role = user[DUNBAR_USER_ROLES_CLAIM]?.roles[0]?.replace("dunbar_user_", "") ?? "Role Not Assigned"
                 elem += `<li user="${user.name}">${user.name}
         <em class="role" userid="${user.user_id}"> : ${role}</em>`
                 if (role !== "Admin") {
-                    elem += `<div class="actions">
-                    <input class="tag is-small "bg-primary" 
-                        type="button" 
-                        value="Make ${role === "public" ? "Contributor" : "Public"}" 
-                        onclick="assignRole('${user.user_id}','${role === "public" ? 'Contributor' : 'Public'}')"/>
-                </div>`
+                    elem += `<form class="actions">
+                    ${ROLES.reduce((a, b) => a += `
+                    <input name="${b}${i}" class="tag is-small "bg-primary" 
+                        type="radio" 
+                        checked=${role===b}
+                        value="${b}" 
+                        onclick="assignRole('${user.user_id}','${b}')"/>
+                        <label for="${b}${i}" >${b}</label>
+                    `, ``)}
+                </form>`
                 }
                 elem += `</li>
         `
