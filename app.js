@@ -68,7 +68,7 @@ app.use('/', indexRouter)
 
 app.use('/dunbar-users', dunbarRouter)
 
-//app.use('/dunbar-users/manage', managementRouter)
+app.use('/dunbar-users/manage', managementRouter)
 
 //catch 404 because of an invalid site path
 app.use(function(req, res, next) {

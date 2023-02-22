@@ -57,27 +57,30 @@ async function adminOnly(token = window.DLA_USER?.authorization) {
             userList.innerHTML = ""
             const user_arr = await getAllUsers()
             let elem = ``
-            for (const [i,user] of user_arr.entries()) {
+            for (const user of user_arr) {
                 //This presumes they will only have one dunbar role here.  Make sure getAllUsers() accounts for that.
                 const role = user[DUNBAR_USER_ROLES_CLAIM]?.roles[0]?.replace("dunbar_user_", "") ?? "Role Not Assigned"
                 elem += `<li user="${user.name}">${user.name}
         <em class="role" userid="${user.user_id}"> : ${role}</em>`
-                if (role !== "Admin") {
-                    elem += `<form class="actions">
-                    ${ROLES.reduce((a, b) => a += `
-                    <input name="${b}${i}" class="tag is-small "bg-primary" 
-                        type="radio" 
-                        checked=${role===b}
-                        value="${b}" 
-                        onclick="assignRole('${user.user_id}','${b}')"/>
-                        <label for="${b}${i}" >${b}</label>
-                    `, ``)}
-                </form>`
+                if (role !== "admin") {
+                    elem += `<div class="actions">
+                    <select name="${user.user_id}">
+                    ${ROLES.reduce((a, b) => {
+                        return a += `<option
+                        ${role === b && "selected=true"}
+                        value="${b}">${b}</option>
+                    `
+                    }, ``)} 
+                    </select>
+                </div>`
                 }
                 elem += `</li>
         `
             }
             userList.innerHTML += elem
+            userList.querySelectorAll('select').forEach(el=>{
+                el.addEventListener('input',event=>assignRole(event.target.name,event.target.value))
+            })
         }
     } catch (_err) {
         alert('not admin. boop.')
@@ -85,32 +88,30 @@ async function adminOnly(token = window.DLA_USER?.authorization) {
     history.replaceState(null, null, ' ')
 }
 
-// async function assignRole(userid, role) {
-//     let url = `/dunbar-users/manage/assign${role}Role/${userid}`
-//     document.querySelectorAll(`.role[userid="${userid}"]`).forEach(elem => {
-//         elem.innerHTML = ` : Updating Role...`
-//     })
-//     fetch(url, {
-//         method: 'GET',
-//         cache: 'default',
-//         headers: {
-//             'Authorization': `Bearer ${window.DLA_USER?.authorization}`,
-//             'Content-Type': "application/json; charset=utf-8"
-//         }
-//     })
-//         .then(_resp => {
-//             document.querySelectorAll(`.role[userid="${userid}"]`).forEach(elem => {
-//                 elem.innerHTML = ` : ${role}`
-//             })
-//         })
-//         .catch(err => {
-//             console.error("Role was not assigned")
-//             console.error(err)
-//             document.querySelectorAll(`.role[userid="${userid}"]`).forEach(elem => {
-//                 elem.innerHTML = ` : Error`
-//             })
-//         })
-// }
+async function assignRole(userid, role) {
+    let url = `/dunbar-users/manage/assignRole`
+    const roleTag = document.querySelector(`.role[userid="${userid}"]`)
+    fetch(url, {
+        method: 'POST',
+        cache: 'default',
+        headers: {
+            'Authorization': `Bearer ${window.DLA_USER?.authorization}`,
+            'Content-Type': "application/json; charset=utf-8"
+        },
+        body: { role, userid }
+    })
+        .then(_resp => {
+            if(!_resp.ok) throw _resp
+            roleTag.innerHTML = role
+            roleTag.classList.add('success')
+            roleTag.classList.remove('error')
+        })
+        .catch(err => {
+            roleTag.innerHTML += `⚠`
+            roleTag.classList.remove('success')
+            roleTag.classList.add('error')
+        })
+}
 
 // /**
 //  * PUT to the dunbar-users back end.
@@ -173,9 +174,11 @@ async function getAllUsers() {
             "Authorization": `Bearer ${window.DLA_USER?.authorization}`
         }
     })
-        .then(resp => resp.json())
+        .then(resp => {
+            if(!resp.ok) throw resp.body
+            return resp.json()
+        })
         .catch(err => {
-            console.error("Error getting Users!!")
             console.error(err)
             return []
         })

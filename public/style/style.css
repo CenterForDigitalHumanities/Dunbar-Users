@@ -6,9 +6,13 @@
     font-weight: bold;
 }
 
-body {
+html {
     font-family: 'Open Sans', sans-serif;
     background-color: #2F353E;
+}
+
+body {
+    background-color: hsl(216, 14%, 91%);
 }
 
 span[data-username]::after{
