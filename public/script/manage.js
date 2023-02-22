@@ -7,10 +7,6 @@ import jwt_decode from "/script/jwt.js"
 // const DUNBAR_REDIRECT = origin + "/manage.html"
 // const DOMAIN = "cubap.auth0.com"
 const DUNBAR_USER_ROLES_CLAIM = "http://dunbar.rerum.io/user_roles"
-const DUNBAR_PUBLIC_ROLE = "dunbar_user_public"
-const DUNBAR_CONTRIBUTOR_ROLE = "dunbar_user_contributor"
-const DUNBAR_ADMIN_ROLE = "dunbar_user_admin"
-// const myURL = document.location.href
 
 // /**
 //  * Solely for getting the user profile.
@@ -59,22 +55,18 @@ async function adminOnly(token = window.DLA_USER?.authorization) {
             let elem = ``
             for (const user of user_arr) {
                 //This presumes they will only have one dunbar role here.  Make sure getAllUsers() accounts for that.
-                const role = user[DUNBAR_USER_ROLES_CLAIM]?.roles[0]?.replace("dunbar_user_", "") ?? "Role Not Assigned"
-                elem += `<li user="${user.name}">${user.name}
-        <em class="role" userid="${user.user_id}"> : ${role}</em>`
-                if (role !== "admin") {
-                    elem += `<div class="actions">
+                elem += `<li user="${user.name}"><p>${user.name}</p>
+                    <img src="${user.picture}">
+                    <span class="role badge badge-primary" userid="${user.user_id}">${user.role}</span>
                     <select name="${user.user_id}">
-                    ${ROLES.reduce((a, b) => {
-                        return a += `<option
-                        ${role === b && "selected=true"}
-                        value="${b}">${b}</option>
-                    `
-                    }, ``)} 
+                        ${ROLES.reduce((a, b) => {
+                            return a += `<option
+                            ${user.role === b && "selected=true"}
+                            value="${b}">${b}</option>
+                        `
+                        }, ``)} 
                     </select>
-                </div>`
-                }
-                elem += `</li>
+                </li>
         `
             }
             userList.innerHTML += elem
@@ -98,18 +90,18 @@ async function assignRole(userid, role) {
             'Authorization': `Bearer ${window.DLA_USER?.authorization}`,
             'Content-Type': "application/json; charset=utf-8"
         },
-        body: { role, userid }
+        body: JSON.stringify({ role, userid })
     })
         .then(_resp => {
             if(!_resp.ok) throw _resp
             roleTag.innerHTML = role
-            roleTag.classList.add('success')
-            roleTag.classList.remove('error')
+            roleTag.classList.add('badge-success')
+            roleTag.classList.remove('badge-danger')
         })
         .catch(err => {
             roleTag.innerHTML += `⚠`
-            roleTag.classList.remove('success')
-            roleTag.classList.add('error')
+            roleTag.classList.remove('badge-success')
+            roleTag.classList.add('badge-danger')
         })
 }
 
@@ -178,15 +170,15 @@ async function getAllUsers() {
             if(!resp.ok) throw resp
             return resp.json()
         })
-        .catch(err => {
-            console.error(err)
+        .catch(async err  => {
+            console.error(err.status)
             return []
         })
 }
 
 function isAdmin(token) {
     const user = jwt_decode(token)
-    return userHasRole(user, DUNBAR_ADMIN_ROLE)
+    return userHasRole(user, 'dunbar_user_admin')
 }
 /**
  * Follows the 'base64url' rules to decode a string.

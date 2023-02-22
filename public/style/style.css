@@ -47,3 +47,19 @@ h1 {
 .no-break {
     white-space: nowrap;
 }
+
+#userList li {
+    flex-basis: clamp(16em, 25%, 20em);
+    width: 18em;
+    overflow: hidden;
+    padding: 1em;
+}
+
+#userList img {
+    max-width: 25%;
+}
+
+#userList {
+    display: flex;
+    flex-wrap: wrap;
+}

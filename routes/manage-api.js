@@ -6,6 +6,13 @@ const express = require('express')
 const router = express.Router()
 const got = require('got')
 
+const ROLES = [
+  process.env.ROLE_CURATOR_ID,
+  process.env.ROLE_REVIEWER_ID,
+  process.env.ROLE_CONTRIBUTOR_ID,
+  process.env.ROLE_PUBLIC_ID
+].map(str => str.split(' ')[0])
+
 let manager = new ManagementClient({
   domain: process.env.DOMAIN,
   clientId: process.env.CLIENTID,
@@ -80,52 +87,30 @@ router.get('/getAllUsers', async function (req, res, next) {
   try {
     authenticator.getProfile(token)
       .then(async (current_dunbar_users) => {
-        if (isAdmin(current_dunbar_users)) {
-          //TODO* - Get all the users and filter out the ones that are for dunbar
-          /*
-          let filter = {
-            "q": `_exists_:app_metadata.app`
-          }
-          */
-          let filter = {
-            "q": `app_metadata.app:"dla"`
-          }
-          //FIXME I believe this is limited to 50 users at a time.
-          //https://auth0.com/docs/manage-users/user-search/retrieve-users-with-get-users-endpoint#limitations
-          let usersWithRoles = await manager.getUsers(filter)
-            // TODO*
-            //.then(allUsers => allUsers.filter(usr => usr.app_metadata.app.includes("dla")))
-            .then(async (allUsers) => {
-              return Promise.all(allUsers.map(async (u) => {
-                let roles = await manager.getUserRoles({ "id": u.user_id })
-                  .then(roles => {
-                    let r = { "roles": [] }
-                    if (roles && roles.length) {
-                      //Only consider the dunbar roles, filter out others
-                      r.roles = roles
-                        .filter(roleObj => roleObj.name.includes("dunbar_user"))
-                        .map(roleObj => roleObj.name)
-                    }
-                    u[process.env.DUNBAR_ROLES_CLAIM] = r
-                  })
-                  .catch(err => {
-                    //Could not get user roles.
-                    console.error(err)
-                    return []
-                  })
-                return u
-              }))
-            })
-            .catch(err => {
-              console.error("Error getting users in back end")
-              console.error(err)
-              res.status(500).send(err)
-            })
-          res.status(200).json(usersWithRoles)
+        if (!isAdmin(current_dunbar_users)) {
+          res.status(403).send("You are not an admin")
+          return
         }
-        else {
-          res.status(401).send("You are not an admin")
-        }
+
+        const fetchUsersInRoles = ROLES.map(id => manager.getUsersInRole({ id }))
+        return Promise.all(fetchUsersInRoles)
+          .then(userGroups => {
+            const roleNames = [
+              "curator",
+              "reviewer",
+              "contributor",
+              "public"
+            ]
+            res.json(userGroups.map((group, index) => group.map(user => {
+              user.role = roleNames[index]
+              return user
+            })).flat())
+            return
+          })
+          .catch(err => {
+            console.error("Error getting users in back end")
+            res.status(500).send(err)
+          })
       })
       .catch(err => {
         res.status(500)
@@ -145,10 +130,10 @@ router.get('/getAllUsers', async function (req, res, next) {
 router.post('/assignRole', async function (req, res, next) {
   const token = (req.header("Authorization") ?? "")?.replace("Bearer ", "")
   const { userid, role } = req.body
-  const roleID = `process.env.ROLE_${String(role).toUpperCase()}_ID`
+  const roleID = process.env[`ROLE_${String(role).toUpperCase()}_ID`]
 
   // Guards
-  if(role==='admin') {
+  if (role === 'admin') {
     res.status(501).send("No changing Admin roles here")
   }
   if (!userid || !roleID) {
@@ -164,21 +149,16 @@ router.post('/assignRole', async function (req, res, next) {
         return
       }
 
-      manager.assignRolesToUser({ id: userid }, { roles:[roleID] })
+      manager.assignRolesToUser({ id: userid }, { roles: [roleID] })
         .then(res => {
-          if(!res.ok) throw res
+          if (!res.ok) throw res
 
           //unassign from other Dunbar roles
-          const dataObj = { roles: [
-            process.env.ROLE_PUBLIC_ID, 
-            process.env.ROLE_CONTRIBUTOR_ID, 
-            process.env.ROLE_REVIEWER_ID,
-            process.env.ROLE_CURATOR_ID
-          ].filter(justAdded=>justAdded!==roleID) }
+          const dataObj = { roles: ROLES.filter(justAdded => justAdded !== roleID) }
 
           manager.removeRolesFromUser({ id: userid }, dataObj)
             .then(resp2 => {
-              if(!res.ok) throw res
+              if (!res.ok) throw res
               res.status(200).send(`${role[0].toUpperCase()}${role.substr(1)} role was successfully assigned to the user`)
             })
             .catch(err => {
@@ -217,7 +197,7 @@ function isAdmin(user) {
   if (user[process.env.DUNBAR_ROLES_CLAIM]) {
     roles = user[process.env.DUNBAR_ROLES_CLAIM].roles ?? { roles: [] }
   }
-  return roles.includes(process.env.DUNBAR_ADMIN_ROLE)
+  return roles.includes("dunbar_user_admin")
 }
 
 /**
