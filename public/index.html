@@ -18,17 +18,21 @@
 <body class="container" data-user="admin">
     <h1><i class="fa fa-cubes"></i>
         dunbar</h1>
+        <button is="auth-button">login</button>
     <div class='' id="intro">
         <p>
-            Manage Dunbar Apps users' roles. Admins can make other users 'Public' or 'Contributor'.
-            Note that profile information updating is not available at this time.
+            Managing Dunbar users' roles is limited to administrators (not listed below).
+        <ol>
+            <li><strong>Contributor:</strong> any student who is committing descriptions, transcriptions, etc. and would like to say “I’m
+                done with this”</li>
+            <li><strong>Reviewer:</strong> selected researchers/RAs who can upgrade “I’m done” to “Ready for release” or reject with a
+                comment</li>
+            <li><strong>Curator:</strong> project leader who can make Collections and Records public so they appear in the DLA for
+                everyone or comment</li>
+        </ol>
         </p>
     </div>
     <div class='panel panel-info' name="block">
-        <div class="who">
-            Logged in as:
-            <button is="auth-button">login</button>
-        </div>
         <h4> Dunbar Users List </h4>
         <ul id="userList">
             <li>

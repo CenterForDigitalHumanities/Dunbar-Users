@@ -149,16 +149,14 @@ router.post('/assignRole', async function (req, res, next) {
         return
       }
 
-      manager.assignRolesToUser({ id: userid }, { roles: [roleID] })
-        .then(res => {
-          if (!res.ok) throw res
-
-          //unassign from other Dunbar roles
+      manager.assignRolestoUser({ id: userid }, { roles: [roleID] })
+        .then(result => {
+          // Super odd. On success, the response is an empty string...
+          // unassign from other Dunbar roles
           const dataObj = { roles: ROLES.filter(justAdded => justAdded !== roleID) }
 
           manager.removeRolesFromUser({ id: userid }, dataObj)
             .then(resp2 => {
-              if (!res.ok) throw res
               res.status(200).send(`${role[0].toUpperCase()}${role.substr(1)} role was successfully assigned to the user`)
             })
             .catch(err => {

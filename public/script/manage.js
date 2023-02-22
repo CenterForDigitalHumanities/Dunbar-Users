@@ -57,7 +57,7 @@ async function adminOnly(token = window.DLA_USER?.authorization) {
                 //This presumes they will only have one dunbar role here.  Make sure getAllUsers() accounts for that.
                 elem += `<li user="${user.name}"><p>${user.name}</p>
                     <img src="${user.picture}">
-                    <span class="role badge badge-primary" userid="${user.user_id}">${user.role}</span>
+                    <span class="role badge " userid="${user.user_id}">${user.role}</span>
                     <select name="${user.user_id}">
                         ${ROLES.reduce((a, b) => {
                             return a += `<option
