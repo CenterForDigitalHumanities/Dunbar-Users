@@ -175,7 +175,7 @@ async function getAllUsers() {
         }
     })
         .then(resp => {
-            if(!resp.ok) throw resp.body
+            if(!resp.ok) throw resp
             return resp.json()
         })
         .catch(err => {
