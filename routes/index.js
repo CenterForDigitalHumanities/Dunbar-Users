@@ -6,10 +6,10 @@ let router = express.Router()
 const staticRouter = require('./static')
 router.get('/',staticRouter)
 
-const managementRouter = require('./routes/manage-api.js')
+const managementRouter = require('./manage-api')
 router.use('/dunbar-users/manage', managementRouter)
 
-const dunbarRouter = require('./routes/dunbar-users.js')
+const dunbarRouter = require('./dunbar-users')
 router.use('/dunbar-users', dunbarRouter)
 
 module.exports = router
