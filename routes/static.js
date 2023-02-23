@@ -15,7 +15,7 @@ router.use(express.static(path.join(__dirname, '../public')))
 
 // Set default API response
 router.get('/', function (req, res) {
-    res.redirect('index.html',200)
+    res.redirect('index.html')
 })
 
 // Export API routes

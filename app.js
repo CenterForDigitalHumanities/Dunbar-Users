@@ -10,11 +10,8 @@ const storedEnv = dotenv.config()
 dotenvExpand.expand(storedEnv)
 const logger = require('morgan')
 const cors = require('cors')
-const got = require('got')
 
 const indexRouter = require('./routes/index.js')
-const dunbarRouter = require('./routes/dunbar-users.js')
-const managementRouter = require('./routes/manage-api.js')
 
 var app = express()
 
@@ -65,10 +62,6 @@ app.use(cookieParser())
 app.use(express.static(path.join(__dirname, 'public')))
 
 app.use('/', indexRouter)
-
-app.use('/dunbar-users/manage', managementRouter)
-
-app.use('/dunbar-users', dunbarRouter)
 
 //catch 404 because of an invalid site path
 app.use(function(req, res, next) {
