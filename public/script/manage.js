@@ -42,7 +42,7 @@ auth.addEventListener("dla-authenticated", ev => {
     }
 })
 
-const ROLES = ['public', 'contributor', 'reviewer', 'curator', 'admin']
+const ROLES = ['public', 'contributor', 'reviewer', 'curator']
 
 async function adminOnly(token = window.DLA_USER?.authorization) {
     //You can trust the token.  However, it may have expired.
