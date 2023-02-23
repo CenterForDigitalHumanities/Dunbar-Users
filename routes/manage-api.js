@@ -6,6 +6,13 @@ const express = require('express')
 const router = express.Router()
 const got = require('got')
 
+const ROLES = [
+  process.env.ROLE_CURATOR_ID,
+  process.env.ROLE_REVIEWER_ID,
+  process.env.ROLE_CONTRIBUTOR_ID,
+  process.env.ROLE_PUBLIC_ID
+].map(str => str.split(' ')[0])
+
 let manager = new ManagementClient({
   domain: process.env.DOMAIN,
   clientId: process.env.CLIENTID,
@@ -18,58 +25,58 @@ let authenticator = new AuthenticationClient({
   clientId: process.env.CLIENTID
 })
 
-/**
- * Let Dunbar Apps Users update THEIR OWN profile info.
- * 
- * Make sure the user making the request is the user to update.
- */
-router.put('/updateProfileInfo', async function (req, res, next) {
-  console.log("update profile info")
-  let token = req.header("Authorization") ?? ""
-  token = token.replace("Bearer ", "")
-  if (token) {
-    authenticator.getProfile(token)
-      .then(async (current_user) => {
-        if (isDunbarUser(current_user)) {
-          //The user object is in the body, and the id is present or fail.
-          let userObj = req.body ?? {}
-          const userid = userObj.sub ?? userObj.user_id ?? userObj.id ?? ""
-          delete userObj.sub
-          delete userObj.user_id
-          delete userObj.id
-          if (userid) {
-            if (current_user.sub === userid) {
-              let params = { id: current_user.sub }
-              manager.updateUser(params, userObj)
-                .then(user => {
-                  res.status(200).json(user)
-                })
-                .catch(err => {
-                  console.error("Trouble updating using profile.")
-                  console.error(err)
-                  res.status(500).send(err)
-                })
-            }
-            else {
-              res.status(401).send("You can only update your own profile.  Please check the id of the user in the request body.")
-            }
-          }
-          else {
-            res.status(400).send("The user object was not JSON or did not have an id.")
-          }
-        }
-        else {
-          res.status(401).send("You are not a Dunbar Apps user, this API is not for you.")
-        }
-      })
-      .catch(err => {
-        res.status(500).send(err)
-      })
-  }
-  else {
-    res.status(403).send("You must be a Dunbar Apps user.  Please provide an access token in the Authorization header.")
-  }
-})
+// /**
+//  * Let Dunbar Apps Users update THEIR OWN profile info.
+//  * 
+//  * Make sure the user making the request is the user to update.
+//  */
+// router.put('/updateProfileInfo', async function (req, res, next) {
+//   console.log("update profile info")
+//   let token = req.header("Authorization") ?? ""
+//   token = token.replace("Bearer ", "")
+//   if (token) {
+//     authenticator.getProfile(token)
+//       .then(async (current_user) => {
+//         if (isDunbarUser(current_user)) {
+//           //The user object is in the body, and the id is present or fail.
+//           let userObj = req.body ?? {}
+//           const userid = userObj.sub ?? userObj.user_id ?? userObj.id ?? ""
+//           delete userObj.sub
+//           delete userObj.user_id
+//           delete userObj.id
+//           if (userid) {
+//             if (current_user.sub === userid) {
+//               let params = { id: current_user.sub }
+//               manager.updateUser(params, userObj)
+//                 .then(user => {
+//                   res.status(200).json(user)
+//                 })
+//                 .catch(err => {
+//                   console.error("Trouble updating using profile.")
+//                   console.error(err)
+//                   res.status(500).send(err)
+//                 })
+//             }
+//             else {
+//               res.status(401).send("You can only update your own profile.  Please check the id of the user in the request body.")
+//             }
+//           }
+//           else {
+//             res.status(400).send("The user object was not JSON or did not have an id.")
+//           }
+//         }
+//         else {
+//           res.status(401).send("You are not a Dunbar Apps user, this API is not for you.")
+//         }
+//       })
+//       .catch(err => {
+//         res.status(500).send(err)
+//       })
+//   }
+//   else {
+//     res.status(403).send("You must be a Dunbar Apps user.  Please provide an access token in the Authorization header.")
+//   }
+// })
 
 /**
  * Get all the users from the Auth0 Tenant with app "dla".
@@ -80,52 +87,30 @@ router.get('/getAllUsers', async function (req, res, next) {
   try {
     authenticator.getProfile(token)
       .then(async (current_dunbar_users) => {
-        if (isAdmin(current_dunbar_users)) {
-          //TODO* - Get all the users and filter out the ones that are for dunbar
-          /*
-          let filter = {
-            "q": `_exists_:app_metadata.app`
-          }
-          */
-          let filter = {
-            "q": `app_metadata.app:"dla"`
-          }
-          //FIXME I believe this is limited to 50 users at a time.
-          //https://auth0.com/docs/manage-users/user-search/retrieve-users-with-get-users-endpoint#limitations
-          let usersWithRoles = await manager.getUsers(filter)
-            // TODO*
-            //.then(allUsers => allUsers.filter(usr => usr.app_metadata.app.includes("dla")))
-            .then(async (allUsers) => {
-              return Promise.all(allUsers.map(async (u) => {
-                let roles = await manager.getUserRoles({ "id": u.user_id })
-                  .then(roles => {
-                    let r = { "roles": [] }
-                    if (roles && roles.length) {
-                      //Only consider the dunbar roles, filter out others
-                      r.roles = roles
-                        .filter(roleObj => roleObj.name.includes("dunbar_user"))
-                        .map(roleObj => roleObj.name)
-                    }
-                    u[process.env.DUNBAR_ROLES_CLAIM] = r
-                  })
-                  .catch(err => {
-                    //Could not get user roles.
-                    console.error(err)
-                    return []
-                  })
-                return u
-              }))
-            })
-            .catch(err => {
-              console.error("Error getting users in back end")
-              console.error(err)
-              res.status(500).send(err)
-            })
-          res.status(200).json(usersWithRoles)
+        if (!isAdmin(current_dunbar_users)) {
+          res.status(403).send("You are not an admin")
+          return
         }
-        else {
-          res.status(401).send("You are not an admin")
-        }
+
+        const fetchUsersInRoles = ROLES.map(id => manager.getUsersInRole({ id }))
+        return Promise.all(fetchUsersInRoles)
+          .then(userGroups => {
+            const roleNames = [
+              "curator",
+              "reviewer",
+              "contributor",
+              "public"
+            ]
+            res.json(userGroups.map((group, index) => group.map(user => {
+              user.role = roleNames[index]
+              return user
+            })).flat())
+            return
+          })
+          .catch(err => {
+            console.error("Error getting users in back end")
+            res.status(500).send(err)
+          })
       })
       .catch(err => {
         res.status(500)
@@ -142,129 +127,49 @@ router.get('/getAllUsers', async function (req, res, next) {
  * This limits access token scope.
  * Other roles are removed.
  */
-router.get('/assignPublicRole/:_id', async function (req, res, next) {
-  let token = req.header("Authorization") ?? ""
-  token = token.replace("Bearer ", "")
+router.post('/assignRole', async function (req, res, next) {
+  const token = (req.header("Authorization") ?? "")?.replace("Bearer ", "")
+  const { userid, role } = req.body
+  const roleID = process.env[`ROLE_${String(role).toUpperCase()}_ID`]
+
+  // Guards
+  if (role === 'admin') {
+    res.status(501).send("No changing Admin roles here")
+  }
+  if (!userid || !roleID) {
+    res.status(406).send("Failed to provide data for assignment")
+    return
+  }
+
+  // Confirm Admin
   authenticator.getProfile(token)
     .then(user => {
-      if (isAdmin(user)) {
-        let params = { "id": process.env.DUNBAR_PUBLIC_ROLE_ID }
-        let data = { "users": [req.params._id] }
-        manager.assignUsersToRole(params, data)
-          .then(resp => {
-            //unassign from other Dunbar roles
-            params = { "id": req.params._id }
-            data = { "roles": [process.env.DUNBAR_CONTRIBUTOR_ROLE_ID, process.env.DUNBAR_ADMIN_ROLE_ID] }
-            manager.removeRolesFromUser(params, data)
-              .then(resp2 => {
-                res.status(200).send("Public role was successfully assinged to the user")
-              })
-              .catch(err => {
-                res.status(500).send(err)
-              })
-          })
-          .catch(err => {
-            res.status(500).send(err)
-          })
+      if (!isAdmin(user)) {
+        res.status(403).send("Unable to authorize request by non-administrator")
+        return
       }
-      else {
-        res.status(500).send("You are not an admin")
-      }
-    })
-    .catch(err => {
-      res.status(500).send(err)
-    })
-})
 
-/**
- * Tell our Dunbar Auth0 to assign the given user id to the Dunbar Contributor role.
- * This limits access token scope.
- * Other roles are removed.
- */
-router.get('/assignContributorRole/:_id', async function (req, res, next) {
-  let token = req.header("Authorization") ?? ""
-  token = token.replace("Bearer ", "")
-  authenticator.getProfile(token)
-    .then(user => {
-      if (isAdmin(user)) {
-        let params = { "id": process.env.DUNBAR_CONTRIBUTOR_ROLE_ID }
-        let data = { "users": [req.params._id] }
-        manager.assignUsersToRole(params, data)
-          .then(resp => {
-            //unassign from other Dunbar roles
-            params = { "id": req.params._id }
-            data = { "roles": [process.env.DUNBAR_PUBLIC_ROLE_ID, process.env.DUNBAR_ADMIN_ROLE_ID] }
-            manager.removeRolesFromUser(params, data)
-              .then(resp2 => {
-                res.status(200).send("Contributor role was successfully assinged to the user")
-              })
-              .catch(err => {
-                res.status(500).send(err)
-              })
-          })
-          .catch(err => {
-            res.status(500).send(err)
-          })
-      }
-      else {
-        res.status(500).send("You are not an admin")
-      }
-    })
-    .catch(err => {
-      res.status(500).send(err)
-    })
-})
+      manager.assignRolestoUser({ id: userid }, { roles: [roleID] })
+        .then(result => {
+          // Super odd. On success, the response is an empty string...
+          // unassign from other Dunbar roles
+          const dataObj = { roles: ROLES.filter(justAdded => justAdded !== roleID) }
 
-/**
- * Tell our Dunbar Auth0 to assign the given user id to the Dunbar Admin role.
- * Other roles are removed.
- */
-// router.post('/assignAdminRole/:_id', async function (req, res, next) {
-//   res.status(501).send("We don't expose this.")
-/*
-let token = req.header("Authorization") ?? ""
-token = token.replace("Bearer ", "")
-authenticator.getProfile(token)
-.then(user =>{
-    if(isAdmin(user)){
-      let params =  { "id" : process.env.DUNBAR_CONTRIBUTOR_ROLE_ID}
-      let data = { "users" : [req.params._id]}
-      manager.assignUsersToRole(params, data)
-      .then(resp => {
-        //unassign from other Dunbar roles
-        params = {"id" : req.params._id}
-        data = { "roles" : [process.env.DUNBAR_PUBLIC_ROLE_ID, process.env.DUNBAR_ADMIN_ROLE_ID]}
-        manager.removeRolesFromUser(params, data)
-        .then(resp2 =>{
-            res.status(200).send("Contributor role was successfully assinged to the user")
+          manager.removeRolesFromUser({ id: userid }, dataObj)
+            .then(resp2 => {
+              res.status(200).send(`${role[0].toUpperCase()}${role.substr(1)} role was successfully assigned to the user`)
+            })
+            .catch(err => {
+              res.status(500).send(err)
+            })
         })
         .catch(err => {
-          res.status(500).send(err)  
-        })  
-      })
-      .catch(err => {
-        res.status(500).send(err)  
-      })
-    }
-    else{
-      res.status(500).send("You are not an admin")  
-    }
-  })
-  .catch(err => {
-    res.status(500).send(err)
-  })
-}
-else{
-  res.status(403).send("You must be a Dunbar Apps user.  Please provide an access token in the Authorization header.")
-}
-})
-
-/**
-* Tell our Dunbar Auth0 to assign the given user id to the Dunbar Admin role.
-* Other roles are removed.
-*/
-router.post('/assignAdminRole/:_id', async function (req, res, next) {
-  res.status(501).send("We don't expose this.")
+          res.status(500).send(err)
+        })
+    })
+    .catch(err => {
+      res.status(401).send("Unable to authenticate request")
+    })
 })
 
 /**
@@ -290,7 +195,7 @@ function isAdmin(user) {
   if (user[process.env.DUNBAR_ROLES_CLAIM]) {
     roles = user[process.env.DUNBAR_ROLES_CLAIM].roles ?? { roles: [] }
   }
-  return roles.includes(process.env.DUNBAR_ADMIN_ROLE)
+  return roles.includes("dunbar_user_admin")
 }
 
 /**

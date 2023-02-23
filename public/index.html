@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en-us">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>Dunbar Users Portal</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.2/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+    <script src="https://centerfordigitalhumanities.github.io/DLA/auth.js" type="module"></script>
+    <script src="script/manage.js" type="module"></script>
+    <link rel="stylesheet" href="./style/style.css">
+</head>
+
+<body class="container" data-user="admin">
+    <h1><i class="fa fa-cubes"></i>
+        dunbar</h1>
+        <button is="auth-button">login</button>
+    <div class='' id="intro">
+        <p>
+            Managing Dunbar users' roles is limited to administrators (not listed below).
+        <ol>
+            <li><strong>Contributor:</strong> any student who is committing descriptions, transcriptions, etc. and would like to say “I’m
+                done with this”</li>
+            <li><strong>Reviewer:</strong> selected researchers/RAs who can upgrade “I’m done” to “Ready for release” or reject with a
+                comment</li>
+            <li><strong>Curator:</strong> project leader who can make Collections and Records public so they appear in the DLA for
+                everyone or comment</li>
+        </ol>
+        </p>
+    </div>
+    <div class='panel panel-info' name="block">
+        <h4> Dunbar Users List </h4>
+        <ul id="userList">
+            <li>
+                <span class="username">Loading...</span>
+            </li>
+        </ul>
+    </div>
+</body>
+
+</html>
