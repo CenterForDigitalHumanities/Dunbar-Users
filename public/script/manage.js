@@ -49,8 +49,8 @@ async function adminOnly(token = window.DLA_USER?.authorization) {
     //A token was in localStorage, so there was a login during this window session.
     //An access token from login is stored. Let's use it to get THIS USER's info.  If it fails, the user needs to login again.
     try {
+        userList.innerHTML = ""
         if (isAdmin(token)) {
-            userList.innerHTML = ""
             const user_arr = await getAllUsers()
             let elem = ``
             for (const user of user_arr) {
@@ -73,6 +73,13 @@ async function adminOnly(token = window.DLA_USER?.authorization) {
             userList.querySelectorAll('select').forEach(el=>{
                 el.addEventListener('input',event=>assignRole(event.target.name,event.target.value))
             })
+        } else {
+            userList.innerHTML = `
+            <h1>${DLA_USER.nickname}</h1>
+            <small>${DLA_USER.email}</small>
+            <p>(${DLA_USER['http://dunbar.rerum.io/user_roles']?.roles?.map(role=>role.replace(/_/g,'&nbsp;')).join(', ')})</p>
+            <img src="${DLA_USER.picture}">
+            `
         }
     } catch (_err) {
         alert('not admin. boop.')
