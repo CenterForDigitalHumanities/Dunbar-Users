@@ -6,7 +6,7 @@ import jwt_decode from "/script/jwt.js"
 // const CLIENTID = "z1DuwzGPYKmF7POW9LiAipO5MvKSDERM"
 // const DUNBAR_REDIRECT = origin + "/manage.html"
 // const DOMAIN = "cubap.auth0.com"
-const DUNBAR_USER_ROLES_CLAIM = "http://dunbar.rerum.io/user_roles"
+const DUNBAR_USER_ROLES_CLAIM = "http://rerum.io/user_roles"
 
 // /**
 //  * Solely for getting the user profile.
@@ -77,7 +77,7 @@ async function adminOnly(token = window.DLA_USER?.authorization) {
             userList.innerHTML = `
             <h1>${DLA_USER.nickname}</h1>
             <small>${DLA_USER.email}</small>
-            <p>(${DLA_USER['http://dunbar.rerum.io/user_roles']?.roles?.map(role=>role.replace(/_/g,'&nbsp;')).join(', ')})</p>
+            <p>(${DLA_USER['http://rerum.io/user_roles']?.roles?.map(role=>role.replace(/_/g,'&nbsp;')).join(', ')})</p>
             <img src="${DLA_USER.picture}">
             `
         }
